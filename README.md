@@ -12,6 +12,19 @@ without the boot scripts brings LG's stock Home back.
 > Developed and tested on an LG OLED65G26LA (G2), webOS 10.2.2 / webOS 25. Other models and firmware
 > versions should work if they are rooted, but are untested; please report what you find.
 
+<p align="center"><img src="docs/screenshots/home.jpg" alt="The home screen: a dock of four apps, the focused app's name on the top shelf and an ambient glow in its colour, then the app grid" width="900"></p>
+
+<table>
+<tr>
+<td><img src="docs/screenshots/grid.jpg" alt="Focus moved into the app grid; the glow changes to the focused app's colour" width="440"></td>
+<td><img src="docs/screenshots/options.jpg" alt="Hold OK on an app for its options: move it in the dock, remove it or hide it" width="440"></td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/customise.jpg" alt="The Customise menu: top buttons, hidden apps and reset" width="440"></td>
+<td><img src="docs/screenshots/inputs.jpg" alt="The Inputs picker listing the TV's HDMI inputs" width="440"></td>
+</tr>
+</table>
+
 ## Requirements
 
 - An LG webOS TV that is **already rooted** with the [Homebrew Channel](https://webosbrew.org)
