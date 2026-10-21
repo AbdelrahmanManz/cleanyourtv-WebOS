@@ -3,7 +3,7 @@
 An Apple TV-style home screen for **rooted LG webOS TVs**, plus a debloat of LG's ads and telemetry.
 It replaces LG's Home app with a clean launcher: a dock of four favourite apps, a top shelf naming the
 focused app with an ambient glow taken from its artwork, an app grid, an Inputs picker, a Settings
-shortcut and a clock, all customisable from the remote. It reads your installed apps live, so new apps show up on their own.
+shortcut, a built-in Live TV player for your own M3U playlist and a clock, all customisable from the remote. It reads your installed apps live, so new apps show up on their own.
 
 Everything is **RAM-only**. Nothing under `/usr`, `/etc` or the firmware is modified, and a reboot
 without the boot scripts brings LG's stock Home back.
@@ -103,6 +103,30 @@ Choices are saved on the TV in `/media/developer/cleanyourtv/config.json` and su
 reinstalls. You can still edit that file (or copy `config.example.json` there) if you prefer; it holds
 `dock` (up to four app ids), `topbar` (buttons with `label`, `icon` and either `app` or `action`), `hidden`
 and `sort` (`usage` or `alpha`).
+
+## Live TV
+
+The launcher can play an IPTV playlist (M3U) of your own, like the one many IPTV providers or media servers
+give you. It is built into the launcher: use the **Live TV** button in the top bar or the **Live TV** tile (hold
+OK on it to put it in the dock). It does not touch LG's own tuner or its channel list.
+
+- **First time:** the screen shows an address and a 4-digit code. Open the address on your phone or computer
+  (same network), enter the code and paste your playlist address (and the XMLTV guide address if the playlist
+  does not point to one). Nothing is stored anywhere but on the TV. The page closes itself after saving, or after
+  ten minutes. You can also set it from a shell on the TV:
+  `curl -X POST localhost:8765/api/live/settings -d '{"playlistUrl":"http://..."}'`.
+- **Remote:** Up/Down or CH+/CH- switch channel, digits jump to a channel number (numbers follow the playlist
+  order, 1 to N), **OK** opens the channel list (groups on the left, what is on now on the right), Info or
+  Left/Right shows the banner with now and next, **Back** (or the Home button) returns to the launcher and stops
+  the picture.
+- **Guide:** the playlist's XMLTV guide is downloaded in the background (compressed, a few seconds of work on the
+  TV) and refreshed twice a day. Only the next 36 hours of your channels are kept.
+- **Streams:** the TV's own video player plays HLS (`.m3u8`). For the common `…/live/<user>/<pass>/<id>.ts` links
+  the launcher asks for the `.m3u8` version first. Plain MPEG-TS streams that are not HLS may not play.
+- **Limits for now:** no recording, pause or favourites. To start over: `curl -X POST localhost:8765/api/live/reset`.
+
+The README, the repository and the installer never contain a playlist address: it lives only in
+`/media/developer/cleanyourtv/live/` on your TV and is removed by the uninstaller.
 
 ## The debloat
 

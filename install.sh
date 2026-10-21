@@ -86,7 +86,7 @@ PY
   # ---- install files ----
   mkdir -p $D/app
   cp "$SRC"/app/* $D/app/
-  cp "$SRC"/helper/helper.js $D/
+  cp "$SRC"/helper/*.js $D/
   cp "$SRC"/scripts/* "$SRC"/uninstall.sh $D/
   chmod +x $D/*.sh $D/10-cleanyourtv-home $D/15-cleanyourtv-debloat
   [ -f $D/config.json ] || cp "$SRC/config.example.json" $D/config.json
@@ -128,6 +128,8 @@ PY
       die "rolled back: LG's Home is restored and the boot scripts are removed. Nothing else was changed. Details: /tmp/cleanyourtv-helper.log"
     fi
   fi
+  # earlier test builds installed Live TV as a separate app; it is part of the launcher now
+  luna-send -n 1 -w 20000 -f luna://com.webos.appInstallService/dev/remove '{"id":"com.cleanyourtv.live","subscribe":false}' </dev/null >/dev/null 2>&1; rm -rf /media/developer/apps/usr/palm/packages/com.cleanyourtv.live /media/developer/apps/usr/palm/applications/com.cleanyourtv.live
   say "done. Hold OK on an app to customise the dock, or use the Customise button at the top right."
   say "Back to LG's Home any time: pick 'Restore LG Home' at the end of the app grid,"
   say "or run: sh $D/undo-home.sh      Update: sh $D/update.sh      Remove everything: sh $D/uninstall.sh"

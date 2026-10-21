@@ -66,21 +66,59 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--night);col
 .row.dim{opacity:.6}
 .row.f{background:var(--ink);color:#0b0c10;opacity:1}
 .more{height:22px;text-align:center;font-size:20px;color:var(--ink2)}
+
+/* Live TV (inside the launcher) */
+#lv{position:absolute;left:0;top:0;width:1920px;height:1080px;z-index:60;background:#000;display:none}
+#lv.on{display:block}
+#lv-stage,#lv-stage video{position:absolute;left:0;top:0;width:1920px;height:1080px;background:#000}
+#lv .layer{position:absolute;opacity:0;pointer-events:none;transition:opacity .2s linear}
+#lv .layer.on{opacity:1}
+#lv-osd{left:0;right:0;bottom:0;height:300px;padding:0 96px 64px;display:flex;align-items:flex-end;gap:36px;background:linear-gradient(to top,rgba(0,0,0,.88),rgba(0,0,0,.62) 60%,rgba(0,0,0,0))}
+#lv-osd .num{font-size:96px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+#lv-osd .logo{width:132px;height:132px;border-radius:24px;background:#1c1e24;object-fit:contain;flex:none}
+#lv-osd .info{flex:1;min-width:0}
+#lv-osd .name{font-size:52px;font-weight:700;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#lv-osd .now{font-size:32px;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#lv-osd .next{font-size:26px;color:var(--ink2);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#lv-osd .bar{height:6px;border-radius:3px;background:rgba(255,255,255,.22);margin-top:14px;width:100%}
+#lv-osd .bar i{display:block;height:100%;border-radius:3px;background:var(--ink);width:0}
+#lv-numin{right:96px;top:64px;font-size:88px;font-weight:700;font-variant-numeric:tabular-nums}
+#lv-msg{left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:18px;font-size:34px}
+#lv-msg.on{background:rgba(0,0,0,.55)}
+#lv-msg b{font-size:56px;letter-spacing:-.02em}
+#lv-msg .small{font-size:26px;color:var(--ink2);max-width:1100px}
+#lv-spin{right:96px;top:64px;width:56px;height:56px;border-radius:50%;border:6px solid rgba(255,255,255,.25);border-top-color:#fff;animation:lvsp 1s linear infinite}
+@keyframes lvsp{to{transform:rotate(360deg)}}
+#lv-list{left:0;top:0;width:1100px;height:1080px;background:rgba(8,9,12,.94);padding:72px 0 0 72px;display:flex;gap:24px}
+#lv-groups{width:380px}#lv-chans{width:580px}
+#lv-list h2{font-size:34px;font-weight:700;margin-bottom:18px;color:var(--ink2)}
+.lrow{display:flex;align-items:center;gap:16px;height:64px;padding:0 22px;border-radius:18px;font-size:27px;margin-bottom:6px;background:rgba(255,255,255,.05)}
+.lrow .n{width:70px;color:var(--ink2);font-variant-numeric:tabular-nums;flex:none}
+.lrow img{width:44px;height:44px;border-radius:10px;object-fit:contain;background:#1c1e24;flex:none}
+.lrow .t{flex:1;min-width:0}
+.lrow .t div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrow .t .p{font-size:20px;color:var(--ink2);margin-top:1px}
+.lrow.cur .n{color:var(--ink)}
+.lrow.f{background:var(--ink);color:#0b0c10}.lrow.f .n,.lrow.f .t .p{color:rgba(11,12,16,.62)}
+.lrow.dim{background:rgba(255,255,255,.12)}
+#lv .more{height:24px;text-align:center;font-size:20px;color:var(--ink2)}
 </style></head><body>
 <div class="glow" id="gA"></div><div class="glow" id="gB"></div>
 <div id="top"><div id="time"></div><div id="date"></div><div class="sp"></div><div id="bar"></div></div>
 <div id="shelf"><div id="name"></div></div>
 <div id="view"><div id="scroll"><div id="dock"></div><div id="grid"></div></div></div>
+<div id="lv"><div id="lv-stage"></div><div id="lv-spin" class="layer"></div><div id="lv-osd" class="layer"><div class="num" id="lv-onum"></div><img class="logo" id="lv-ologo" alt=""><div class="info"><div class="name" id="lv-oname"></div><div class="now" id="lv-onow"></div><div class="next" id="lv-onext"></div><div class="bar"><i id="lv-obar"></i></div></div></div><div id="lv-numin" class="layer"></div><div id="lv-list" class="layer"><div id="lv-groups"></div><div id="lv-chans"></div></div><div id="lv-msg" class="layer"></div></div>
 <div id="toast"></div>
 <script>
-var API='http://127.0.0.1:8765', CACHE_KEY='cytv.cache.v2', VERSION='1.1.0';
+var API='http://127.0.0.1:8765', CACHE_KEY='cytv.cache.v2', VERSION='1.2.0';
 var DEFAULTS={
   dock:['netflix','youtube.leanback.v4','amazon','com.disney.disneyplus-prod'],
-  topbar:[{label:'Inputs',icon:'inputs',action:'inputs'},{label:'Settings',icon:'settings',app:'com.palm.app.settings'}]
+  topbar:[{label:'Inputs',icon:'inputs',action:'inputs'},{label:'Live TV',icon:'tv',action:'live'},{label:'Settings',icon:'settings',app:'com.palm.app.settings'}]
 };
 var PRESETS=[
   {label:'Inputs',icon:'inputs',action:'inputs'},
-  {label:'Settings',icon:'settings',app:'com.palm.app.settings'}
+  {label:'Settings',icon:'settings',app:'com.palm.app.settings'},
+  {label:'Live TV',icon:'tv',action:'live'}
 ];
 var ICONS={
   inputs:'<path d="M15 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/>',
@@ -101,9 +139,13 @@ var TX={
  fr:{'Inputs':'Entrées','Settings':'Paramètres','Customise':'Personnaliser','Open':'Ouvrir','Move left in dock':'Déplacer à gauche dans le dock','Move right in dock':'Déplacer à droite dans le dock','Remove from dock':'Retirer du dock','Add to dock':'Ajouter au dock','Add to dock...':'Ajouter au dock...','Replace which app?':'Remplacer quelle app ?','Hide app':'Masquer l’app','Remove this button':'Supprimer ce bouton','hold OK on an app':'maintenez OK sur une app','Hold OK on any app to change the dock':'Maintenez OK sur une app pour modifier le dock','Top buttons':'Boutons du haut','Hidden apps':'Apps masquées','App order':'Ordre des apps','Most used first':'Les plus utilisées d’abord','A to Z':'De A à Z','Reset customisation':'Tout réinitialiser','Add a button...':'Ajouter un bouton...','Add a button':'Ajouter un bouton','An app...':'Une app...','Pick an app':'Choisir une app','OK to remove':'OK pour supprimer','Hidden apps (OK to show again)':'Apps masquées (OK pour afficher)','No hidden apps':'Aucune app masquée','Restore LG Home':'Rétablir LG Home','Restoring LG Home (about 15 s, until next reboot)...':'Rétablissement de LG Home (environ 15 s, jusqu’au prochain redémarrage)...','Could not open':'Impossible d’ouvrir','Could not save settings':'Impossible d’enregistrer les réglages','Helper not reachable, retrying...':'Assistant injoignable, nouvel essai...','Connected':'Connecté','Active':'Actif','Clock':'Horloge','Automatic':'Automatique','24-hour':'24 heures','12-hour':'12 heures'},
  es:{'Inputs':'Entradas','Settings':'Ajustes','Customise':'Personalizar','Open':'Abrir','Move left in dock':'Mover a la izquierda en el dock','Move right in dock':'Mover a la derecha en el dock','Remove from dock':'Quitar del dock','Add to dock':'Añadir al dock','Add to dock...':'Añadir al dock...','Replace which app?':'¿Qué app reemplazar?','Hide app':'Ocultar app','Remove this button':'Quitar este botón','hold OK on an app':'mantén OK en una app','Hold OK on any app to change the dock':'Mantén OK en una app para cambiar el dock','Top buttons':'Botones superiores','Hidden apps':'Apps ocultas','App order':'Orden de las apps','Most used first':'Más usadas primero','A to Z':'De la A a la Z','Reset customisation':'Restablecer personalización','Add a button...':'Añadir un botón...','Add a button':'Añadir un botón','An app...':'Una app...','Pick an app':'Elige una app','OK to remove':'OK para quitar','Hidden apps (OK to show again)':'Apps ocultas (OK para mostrar)','No hidden apps':'No hay apps ocultas','Restore LG Home':'Restaurar LG Home','Restoring LG Home (about 15 s, until next reboot)...':'Restaurando LG Home (unos 15 s, hasta el próximo reinicio)...','Could not open':'No se pudo abrir','Could not save settings':'No se pudieron guardar los ajustes','Helper not reachable, retrying...':'Helper no disponible, reintentando...','Connected':'Conectado','Active':'Activo','Clock':'Reloj','Automatic':'Automático','24-hour':'24 horas','12-hour':'12 horas'}
 };
-function t(k){var d=TX[LANG];return (d&&d[k])||k}
+var TXL={nl:{'Live TV':'Live TV','All channels':'Alle zenders','Loading channels...':'Zenders laden...','Set up Live TV':'Live TV instellen','Open this address on your phone or computer:':'Open dit adres op je telefoon of computer:','and enter this code:':'en voer deze code in:','Then paste your M3U playlist address. This page closes by itself.':'Plak daarna het adres van je M3U-afspeellijst. Deze pagina sluit vanzelf.','This channel is not available.':'Deze zender is niet beschikbaar.','Press OK to try again.':'Druk op OK om het opnieuw te proberen.','The helper is not reachable.':'De helper is niet bereikbaar.','Next':'Straks','No guide data':'Geen programmagegevens'},
+ de:{'All channels':'Alle Sender','Loading channels...':'Sender werden geladen...','Set up Live TV':'Live TV einrichten','Open this address on your phone or computer:':'Öffne diese Adresse auf dem Handy oder Computer:','and enter this code:':'und gib diesen Code ein:','Then paste your M3U playlist address. This page closes by itself.':'Füge dann die Adresse deiner M3U-Playlist ein. Diese Seite schließt sich von selbst.','This channel is not available.':'Dieser Sender ist nicht verfügbar.','Press OK to try again.':'OK drücken, um es erneut zu versuchen.','The helper is not reachable.':'Der Helper ist nicht erreichbar.','Next':'Danach','No guide data':'Keine Programmdaten'},
+ fr:{'All channels':'Toutes les chaînes','Loading channels...':'Chargement des chaînes...','Set up Live TV':'Configurer Live TV','Open this address on your phone or computer:':'Ouvrez cette adresse sur votre téléphone ou ordinateur :','and enter this code:':'et saisissez ce code :','Then paste your M3U playlist address. This page closes by itself.':'Collez ensuite l’adresse de votre liste M3U. Cette page se ferme toute seule.','This channel is not available.':'Cette chaîne n’est pas disponible.','Press OK to try again.':'Appuyez sur OK pour réessayer.','The helper is not reachable.':'L’assistant est injoignable.','Next':'Ensuite','No guide data':'Pas de guide'},
+ es:{'All channels':'Todos los canales','Loading channels...':'Cargando canales...','Set up Live TV':'Configurar Live TV','Open this address on your phone or computer:':'Abre esta dirección en tu móvil u ordenador:','and enter this code:':'e introduce este código:','Then paste your M3U playlist address. This page closes by itself.':'Después pega la dirección de tu lista M3U. Esta página se cierra sola.','This channel is not available.':'Este canal no está disponible.','Press OK to try again.':'Pulsa OK para reintentar.','The helper is not reachable.':'El helper no está disponible.','Next':'Después','No guide data':'Sin guía'}};
+function t(k){var d=TX[LANG],l=TXL[LANG];return (d&&d[k])||(l&&l[k])||k}
 /* a button's label: built-in buttons are translated, buttons you added keep the app's own name */
-function barLabel(o){return o.action==='inputs'?t('Inputs'):o.app==='com.palm.app.settings'?t('Settings'):o.action==='customize'?t('Customise'):(o.label||'')}
+function barLabel(o){return o.action==='inputs'?t('Inputs'):o.app==='com.palm.app.settings'?t('Settings'):o.action==='customize'?t('Customise'):o.action==='live'?t('Live TV'):(o.label||'')}
 function clockOpts(){var c=cfg.clock,o={hour:'numeric',minute:'2-digit'};if(c==='24'){o.hourCycle='h23'}else if(c==='12'){o.hourCycle='h12';o.hour='numeric'}return o}
 
 var apps=[], cfg={}, usage={}, warned=false, rows=[], r=1, c=0, colors={}, tiles={}, lastSig='', gSide=0, gColor='', gT=0, saveT=0;
@@ -111,7 +153,7 @@ function $(id){return document.getElementById(id)}
 var toastT;
 function toast(t){var e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(function(){e.classList.remove('on')},4000)}
 function api(p,body){return fetch(API+p,body?{method:'POST',body:JSON.stringify(body)}:{}).then(function(x){return x.json()})}
-function launch(id,params){api('/api/launch',{id:id,params:params}).then(function(x){if(x&&x.returnValue===false)toast(t('Could not open')+' '+id)})}
+function launch(id,params){if(id==='__live')return LIVE.enter();api('/api/launch',{id:id,params:params}).then(function(x){if(x&&x.returnValue===false)toast(t('Could not open')+' '+id)})}
 function store(){try{localStorage.setItem(CACHE_KEY,JSON.stringify({apps:apps,cfg:cfg,usage:usage,colors:colors}))}catch(e){}}
 function storeSoon(){clearTimeout(saveT);saveT=setTimeout(store,1500)}
 
@@ -151,7 +193,7 @@ function tile(a){
   i.onload=function(){if(!colors[a.id]){colors[a.id]=iconColor(i,a.id);paint(d,colors[a.id]);storeSoon();if(rows[r]&&rows[r][c]===d)glowNow(d)}};
   i.onerror=function(){i.remove();var t=document.createElement('div');t.className='t';t.textContent=a.title;d.appendChild(t);
     if(!colors[a.id]){var f=hsl2rgb(hashHue(a.id),.42,.42);colors[a.id]={c:f,b:hsl2rgb(hashHue(a.id),.4,.2)};paint(d,colors[a.id])}};
-  i.src=API+'/icon/'+encodeURIComponent(a.id);d.appendChild(i);
+  i.src=a.id==='__live'?LIVE_ICON:API+'/icon/'+encodeURIComponent(a.id);d.appendChild(i);
   return d}
 
 /* ---------- ambient glow: two layers cross-fade, updated only once focus settles ---------- */
@@ -197,6 +239,7 @@ function act(e){
     return launch(a.id)}
   var o=e._o||{};
   if(o.action==='customize')return customizeMenu();
+  if(o.action==='live')return LIVE.enter();
   if(o.action==='inputs')return inputsMenu();
   if(o.app)launch(o.app,o.params)}
 
@@ -304,7 +347,7 @@ function load(){api('/api/apps').then(function(x){
   var rank=Object.keys(usage).sort(function(a,b){return usage[b]-usage[a]});
   var sig=JSON.stringify([x.apps.map(function(a){return a.id}),x.config,rank]);
   if(sig===lastSig)return;lastSig=sig;
-  apps=x.apps.map(function(a){return {id:a.id,title:a.title}});cfg=x.config||{};store();rebuild()
+  apps=x.apps.map(function(a){return {id:a.id,title:a.title}});apps.push({id:'__live',title:t('Live TV')});cfg=x.config||{};store();rebuild()
 }).catch(function(){toast(t('Helper not reachable, retrying...'));setTimeout(load,3000)})}
 
 /* ---------- input: tap OK to open, hold OK for options ---------- */
@@ -320,7 +363,7 @@ function options(e){
 /* Pointer focus follows real pointer movement only: a tile sliding under a still cursor, a cursor jitter when
    the remote is picked up, or a pointer move right after a button press must not steal the focus. */
 document.addEventListener('mousemove',function(ev){
-  if(stack.length||Date.now()-lastKey<1500)return;
+  if(stack.length||LIVE.on||Date.now()-lastKey<1500)return;
   if(lastMX<0){lastMX=ev.clientX;lastMY=ev.clientY;return}
   if(Math.abs(ev.clientX-lastMX)+Math.abs(ev.clientY-lastMY)<24)return;
   lastMX=ev.clientX;lastMY=ev.clientY;
@@ -329,6 +372,7 @@ document.addEventListener('mousemove',function(ev){
 
 document.addEventListener('keydown',function(e){
   var k=e.keyCode;lastKey=Date.now();
+  if(LIVE.on){LIVE.key(e);return}
   if(stack.length){
     if(k===13){if(downEnter&&Date.now()-lastEnter<1500){lastEnter=Date.now();e.preventDefault();return}downEnter=true;lastEnter=Date.now();swallowUp=true}
     if(menuKey(k))e.preventDefault();return}
@@ -349,13 +393,119 @@ document.addEventListener('keyup',function(e){
   if(swallowUp){swallowUp=false;downEnter=false;return}
   if(downEnter&&!held)act(rows[r][c]);
   downEnter=false;held=false});
-document.addEventListener('webOSRelaunch',load);
-document.addEventListener('visibilitychange',function(){if(!document.hidden)load()});
+document.addEventListener('webOSRelaunch',function(){if(LIVE.on)LIVE.exit();load()});
+document.addEventListener('visibilitychange',function(){if(document.hidden){if(LIVE.on)LIVE.exit()}else load()});
 
 function tick(){var d=new Date();
   try{$('time').textContent=d.toLocaleTimeString(LOC,clockOpts());$('date').textContent=d.toLocaleDateString(LOC,{weekday:'long',day:'numeric',month:'long'})}
   catch(e){$('time').textContent=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)}}
 setInterval(tick,15000);tick();
+
+
+/* ---------- Live TV (plays the user's M3U playlist in the TV's own video player) ---------- */
+var LIVE_ICON='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 130"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e2a4a"/><stop offset="1" stop-color="#07080d"/></linearGradient><linearGradient id="sc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7a59"/><stop offset="1" stop-color="#e8445a"/></linearGradient></defs><rect width="130" height="130" fill="url(#bg)"/><rect x="22" y="30" width="86" height="58" rx="10" fill="url(#sc)"/><path d="M58 48 L58 70 L77 59 Z" fill="#fff"/><path d="M48 100 H82" stroke="#f5f6f8" stroke-width="7" stroke-linecap="round"/><circle cx="98" cy="40" r="5" fill="#fff"/></svg>');
+var LIVE=(function(){
+  var chans=[],groups=[],byNum={},cur=0,epgNow={},video=null,variants=[],vi=0,osdT=0,numT=0,numBuf='',spinT=0,failed=false,loaded=false,setupT=0,fetchT=0;
+  var L={open:false,g:0,col:'c',ci:0,list:[]},o={on:false};
+  function lesc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function layer(id,on){$(id).classList.toggle('on',!!on)}
+  function msg(h){$('lv-msg').innerHTML=h;layer('lv-msg',true)}
+  function variantsFor(url){var v=[];if(/\/live\/.+\.ts(\?|$)/.test(url))v.push({src:url.replace(/\.ts(\?|$)/,'.m3u8$1'),type:'application/x-mpegURL'});v.push({src:url,type:'application/x-mpegURL'});v.push({src:url,type:''});return v}
+  function stop(){clearTimeout(spinT);if(video){try{video.pause();video.removeAttribute('src');video.load()}catch(e){}video=null}$('lv-stage').innerHTML=''}
+  function startVariant(){
+    stop();
+    var v=document.createElement('video');v.autoplay=true;video=v;
+    var d=variants[vi],src=document.createElement('source');src.src=d.src;if(d.type)src.type=d.type;v.appendChild(src);
+    $('lv-stage').appendChild(v);layer('lv-spin',true);
+    v.addEventListener('playing',function(){if(v===video)layer('lv-spin',false)});
+    v.addEventListener('waiting',function(){if(v===video)layer('lv-spin',true)});
+    v.addEventListener('error',function(){if(v!==video)return;if(vi<variants.length-1){vi++;startVariant()}else{layer('lv-spin',false);failed=true;msg('<b>'+lesc(byNum[cur].name)+'</b><div>'+t('This channel is not available.')+'</div><div class="small">'+t('Press OK to try again.')+'</div>')}});
+    spinT=setTimeout(function(){if(v===video&&v.readyState<3&&!failed)v.dispatchEvent(new Event('error'))},20000)}
+  function play(num,quiet){
+    var c=byNum[num];if(!c)return;
+    cur=num;try{localStorage.setItem('live.last',String(num))}catch(e){}
+    failed=false;variants=variantsFor(c.url);vi=0;layer('lv-msg',false);startVariant();
+    if(!quiet)showOsd();else fillOsd();loadEpg([c.id])}
+  function hm(ts){var d=new Date(ts*1000);return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)}
+  function fillOsd(){
+    var c=byNum[cur];if(!c)return;
+    $('lv-onum').textContent=c.num;$('lv-oname').textContent=c.name;
+    var lg=$('lv-ologo');if(c.logo){lg.src=c.logo;lg.style.display=''}else lg.style.display='none';
+    var e=epgNow[c.id],now=Math.floor(Date.now()/1000);
+    if(e&&e.now){$('lv-onow').textContent=hm(e.now[0])+'  '+e.now[2];$('lv-obar').style.width=Math.max(0,Math.min(100,(now-e.now[0])/(e.now[1]-e.now[0])*100))+'%'}
+    else{$('lv-onow').textContent=e?'':t('No guide data');$('lv-obar').style.width='0'}
+    $('lv-onext').textContent=e&&e.next?t('Next')+'  '+hm(e.next[0])+'  '+e.next[2]:''}
+  function showOsd(){fillOsd();layer('lv-osd',true);clearTimeout(osdT);osdT=setTimeout(function(){layer('lv-osd',false)},5500)}
+  function loadEpg(ids,cb){
+    ids=ids.filter(function(i){return i});if(!ids.length){cb&&cb();return}
+    api('/api/live/epg?ids='+encodeURIComponent(ids.join(','))).then(function(x){for(var k in x)epgNow[k]=x[k];if(byNum[cur]&&ids.indexOf(byNum[cur].id)>=0)fillOsd();cb&&cb()}).catch(function(){cb&&cb()})}
+  setInterval(function(){if(o.on&&byNum[cur])loadEpg([byNum[cur].id])},30000);
+  function listFor(g){return g===0?chans:chans.filter(function(c){return c.group===groups[g-1]})}
+  function openList(){
+    L.open=true;L.col='c';var c=byNum[cur];L.g=0;
+    if(c&&c.group){var gi=groups.indexOf(c.group);if(gi>=0)L.g=gi+1}
+    L.list=listFor(L.g);L.ci=Math.max(0,L.list.indexOf(c));drawList();layer('lv-list',true);fetchVisible()}
+  function closeList(){L.open=false;layer('lv-list',false)}
+  function drawList(){
+    var N=11,names=[t('All channels')].concat(groups),gs=Math.max(0,Math.min(L.g-5,names.length-N)),gh='<h2>'+t('Live TV')+'</h2><div class="more">'+(gs>0?'▲':'')+'</div>';
+    for(var i=gs;i<Math.min(names.length,gs+N);i++)gh+='<div class="lrow'+(i===L.g?(L.col==='g'?' f':' dim'):'')+'"><div class="t"><div>'+lesc(names[i])+'</div></div></div>';
+    gh+='<div class="more">'+(gs+N<names.length?'▼':'')+'</div>';$('lv-groups').innerHTML=gh;
+    var cs=Math.max(0,Math.min(L.ci-5,L.list.length-N)),ch='<h2>&nbsp;</h2><div class="more">'+(cs>0?'▲':'')+'</div>';
+    for(var j=cs;j<Math.min(L.list.length,cs+N);j++){
+      var c=L.list[j],e=epgNow[c.id],p=e&&e.now?e.now[2]:'';
+      ch+='<div class="lrow'+(j===L.ci?(L.col==='c'?' f':' dim'):'')+(c.num===cur?' cur':'')+'"><div class="n">'+c.num+'</div>'+(c.logo?'<img src="'+lesc(c.logo)+'" alt="">':'<img alt="">')+'<div class="t"><div>'+lesc(c.name)+'</div><div class="p">'+lesc(p)+'</div></div></div>'}
+    ch+='<div class="more">'+(cs+N<L.list.length?'▼':'')+'</div>';$('lv-chans').innerHTML=ch}
+  function fetchVisible(){
+    clearTimeout(fetchT);fetchT=setTimeout(function(){
+      var cs=Math.max(0,Math.min(L.ci-5,L.list.length-11)),ids=L.list.slice(cs,cs+11).map(function(c){return c.id}).filter(function(i){return i&&!epgNow[i]});
+      if(ids.length)loadEpg(ids,function(){if(L.open)drawList()})},180)}
+  function digit(d){
+    numBuf+=d;if(numBuf.length>5)numBuf=numBuf.slice(-5);
+    $('lv-numin').textContent=numBuf;layer('lv-numin',true);clearTimeout(numT);
+    numT=setTimeout(function(){var n=parseInt(numBuf,10);numBuf='';layer('lv-numin',false);if(byNum[n])play(n);else showOsd()},1800)}
+  function setup(){
+    api('/api/live/pair',{}).then(function(p){
+      msg('<b>'+t('Set up Live TV')+'</b><div>'+t('Open this address on your phone or computer:')+'</div><b>'+lesc(p.url)+'</b><div>'+t('and enter this code:')+'</div><b>'+lesc(p.code)+'</b><div class="small">'+t('Then paste your M3U playlist address. This page closes by itself.')+'</div>');
+      clearInterval(setupT);setupT=setInterval(function(){if(!o.on){clearInterval(setupT);return}api('/api/live/status').then(function(s){if(s.configured){clearInterval(setupT);boot()}})},2500)})}
+  function boot(){
+    msg('<div>'+t('Loading channels...')+'</div>');
+    api('/api/live/status').then(function(s){
+      if(!s.configured){setup();return}
+      var tries=0;
+      (function load(){
+        if(!o.on)return;
+        api('/api/live/channels').then(function(x){
+          if(!x.channels.length){if(++tries>40){msg('<div>'+lesc(s.error||'No channels')+'</div>');return}setTimeout(load,2000);return}
+          groups=x.groups;chans=x.channels.map(function(r){return {num:r[0],id:r[1],name:r[2],group:r[3],logo:r[4],url:r[5]}});
+          byNum={};chans.forEach(function(c){byNum[c.num]=c});loaded=true;
+          var last=0;try{last=parseInt(localStorage.getItem('live.last'),10)}catch(e){}
+          layer('lv-msg',false);play(byNum[last]?last:chans[0].num)})
+      })()
+    }).catch(function(){msg('<div>'+t('The helper is not reachable.')+'</div>');setTimeout(function(){if(o.on)boot()},3000)})}
+  function step(d){var i=chans.indexOf(byNum[cur]);i=(i+d+chans.length)%chans.length;play(chans[i].num)}
+  o.enter=function(){o.on=true;$('lv').classList.add('on');if(loaded&&byNum[cur])play(cur);else boot()};
+  o.exit=function(){o.on=false;closeList();stop();clearTimeout(osdT);clearTimeout(numT);clearInterval(setupT);layer('lv-osd',false);layer('lv-numin',false);layer('lv-msg',false);layer('lv-spin',false);$('lv').classList.remove('on')};
+  o.key=function(e){
+    var k=e.keyCode;e.preventDefault();
+    if(!loaded){if(k===461||k===27||k===8)o.exit();return}
+    if(L.open){
+      if(k===38){if(L.col==='g'){if(L.g>0){L.g--;L.list=listFor(L.g);L.ci=0}}else if(L.ci>0)L.ci--}
+      else if(k===40){if(L.col==='g'){if(L.g<groups.length){L.g++;L.list=listFor(L.g);L.ci=0}}else if(L.ci<L.list.length-1)L.ci++}
+      else if(k===37)L.col='g';
+      else if(k===39)L.col='c';
+      else if(k===13){if(L.col==='g')L.col='c';else if(L.list[L.ci]){var n=L.list[L.ci].num;closeList();play(n);return}}
+      else if(k===461||k===27||k===8){closeList();return}
+      else if(k>=48&&k<=57){closeList();digit(k-48);return}
+      else return;
+      drawList();fetchVisible();return}
+    if(k===13){if(failed)play(cur);else openList()}
+    else if(k===38||k===33||k===427)step(1);
+    else if(k===40||k===34||k===428)step(-1);
+    else if(k===457||k===37||k===39)showOsd();
+    else if(k>=48&&k<=57)digit(k-48);
+    else if(k>=96&&k<=105)digit(k-96);
+    else if(k===461||k===27||k===8)o.exit()};
+  return o})();
 
 /* first paint straight from the last known layout, then refresh from the helper */
 try{var cached=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');

@@ -1,7 +1,7 @@
 // Root helper for cleanyourtv launcher: bridges the launcher web app to luna and serves app icons.
 // Listens on 127.0.0.1 only.
 const http = require('http'), fs = require('fs'), path = require('path'), cp = require('child_process');
-const VERSION = '1.1.0';
+const VERSION = '1.2.0';
 const PORT = 8765, DIR = '/media/developer/cleanyourtv', CONF = DIR + '/config.json', USAGE = DIR + '/usage.json';
 const ENV = Object.assign({}, process.env, { PATH: '/usr/bin:/usr/sbin:/bin:/sbin:' + (process.env.PATH || '') });
 
@@ -64,6 +64,8 @@ function pollForeground() {
   ch.on('error', () => {});
   ch.on('close', () => { try { const o = JSON.parse(out); if (o.returnValue !== false) onForeground(o.appId || ''); } catch (_) {} });
 }
+let live = null;
+try { live = require('./live'); } catch (e) { console.error('live module failed:', e.message); }
 const body = req => new Promise(r => { let b = ''; req.on('data', c => b += c); req.on('end', () => { try { r(JSON.parse(b || '{}')); } catch (_) { r({}); } }); });
 
 http.createServer(async (req, res) => {
@@ -73,6 +75,7 @@ http.createServer(async (req, res) => {
   const json = (o, c) => { res.writeHead(c || 200, { 'content-type': 'application/json' }); res.end(JSON.stringify(o)); };
   const u = req.url.split('?')[0];
   try {
+    if (live && u.startsWith('/api/live/')) return live.handle(req, res, u, body);
     if (u === '/api/version') return json({ version: VERSION });
     if (u === '/api/apps') return json({ apps: await apps(), config: readConf(), usage: usageScores(), version: VERSION });
     if (u === '/api/inputs') return json(await luna('luna://com.webos.service.eim/getAllInputStatus', {}));
