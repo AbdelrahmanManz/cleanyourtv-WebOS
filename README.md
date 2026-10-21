@@ -116,6 +116,10 @@ Unless you pass `--no-debloat`, about a minute after every boot the script:
   update blocking from the Homebrew Channel, are untouched.
 
 Nothing is uninstalled, and everything is undone by `debloat-undo.sh` or a reboot without the script.
+
+**The debloat only runs while this launcher replaces Home.** LG's own Home fails to start when those services
+are blocked, so *Restore LG Home* (and `undo-home.sh`) lifts the debloat first, and the boot script skips the
+debloat whenever the launcher is disabled.
 If an app misbehaves, `touch /media/developer/cleanyourtv/DISABLE-DEBLOAT` and reboot.
 
 ## Getting back to LG's Home

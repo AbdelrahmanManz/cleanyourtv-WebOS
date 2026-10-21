@@ -1,7 +1,9 @@
 #!/bin/sh
 # Restore LG's stock Home. "temp": until next reboot only; no arg: also create DISABLE so reboots keep stock Home.
 export PATH=/usr/bin:/usr/sbin:/bin:/sbin:$PATH
-[ "$1" = temp ] || touch /media/developer/cleanyourtv/DISABLE
+[ "$1" = temp ] || touch /media/developer/cleanyourtv/DISABLE /media/developer/cleanyourtv/DISABLE-DEBLOAT
+# LG's own Home needs the ad services the debloat blocks (it fails to start without them), so lift the debloat first
+[ -f /media/developer/cleanyourtv/debloat-undo.sh ] && sh /media/developer/cleanyourtv/debloat-undo.sh </dev/null >/dev/null 2>&1
 for m in $(awk '$2 ~ /applications\/com.webos.app.home$/ {print $2}' /proc/mounts | sort -r); do umount $m 2>/dev/null; done
 # an airplay child of sam makes the stop wait ~90 s; kill it once the stop has begun
 (sleep 3; pkill -9 -f /usr/palm/applications/airplay/LunaExecutable) </dev/null >/dev/null 2>&1 &
