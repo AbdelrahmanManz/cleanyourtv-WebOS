@@ -18,8 +18,7 @@ let appCache = null, appCacheAt = 0;
 async function apps() {
   if (appCache && Date.now() - appCacheAt < 5000) return appCache;
   const r = await luna('luna://com.webos.applicationManager/listApps', {});
-  const hidden = new Set(readConf().hidden || []);
-  appCache = (r.apps || []).filter(a => a.visible !== false && a.id !== 'com.webos.app.home' && !hidden.has(a.id))
+  appCache = (r.apps || []).filter(a => a.visible !== false && a.id !== 'com.webos.app.home')
     .map(a => ({ id: a.id, title: a.title, icon: a.largeIcon || a.icon, folder: a.folderPath, type: a.type }));
   appCacheAt = Date.now();
   return appCache;
@@ -40,6 +39,18 @@ http.createServer(async (req, res) => {
       const b = await body(req);
       if (!/^[\w.\-]+$/.test(b.id || '')) return json({ error: 'bad id' }, 400);
       return json(await luna('luna://com.webos.applicationManager/launch', { id: b.id, params: b.params || {} }));
+    }
+    if (u === '/api/config' && req.method === 'POST') {
+      const b = await body(req), strs = v => Array.isArray(v) ? v.filter(x => typeof x === 'string').slice(0, 200) : undefined;
+      const out = {};
+      if (strs(b.dock)) out.dock = strs(b.dock).slice(0, 4);
+      if (strs(b.hidden)) out.hidden = strs(b.hidden);
+      if (Array.isArray(b.topbar)) out.topbar = b.topbar.slice(0, 12).filter(o => o && typeof o.label === 'string').map(o => {
+        const t = { label: o.label.slice(0, 40), icon: String(o.icon || 'grid').slice(0, 20) };
+        if (typeof o.action === 'string') t.action = o.action; if (typeof o.app === 'string') t.app = o.app;
+        if (o.params && typeof o.params === 'object') t.params = o.params; return t; });
+      fs.writeFileSync(CONF + '.tmp', JSON.stringify(out, null, 2)); fs.renameSync(CONF + '.tmp', CONF);
+      return json({ returnValue: true });
     }
     if (u === '/api/undo' && req.method === 'POST') {
       cp.spawn('/bin/sh', ['-c', 'sleep 1; sh /media/developer/cleanyourtv/undo-home.sh temp'], { env: ENV, detached: true, stdio: 'ignore' }).unref();

@@ -3,7 +3,7 @@
 An Apple TV-style home screen for **rooted LG webOS TVs**, plus a debloat of LG's ads and telemetry.
 It replaces LG's Home app with a clean launcher: a dock of four favourite apps, a top shelf naming the
 focused app with an ambient glow taken from its artwork, an app grid, an Inputs picker, a Settings
-shortcut and a clock. It reads your installed apps live, so new apps show up on their own.
+shortcut and a clock, all customisable from the remote. It reads your installed apps live, so new apps show up on their own.
 
 Everything is **RAM-only**. Nothing under `/usr`, `/etc` or the firmware is modified, and a reboot
 without the boot scripts brings LG's stock Home back.
@@ -55,27 +55,19 @@ installer is safe to run again; it updates the launcher and keeps your `config.j
    - `15-cleanyourtv-debloat` (skipped with `--no-debloat`) runs the debloat a minute after boot.
 4. Applies both immediately.
 
-## Configure
+## Customise
 
-Edit `/media/developer/cleanyourtv/config.json` on the TV, then reopen Home:
+Everything is changed in the launcher itself; there is nothing to edit by hand.
 
-```json
-{
-  "dock": ["netflix", "youtube.leanback.v4", "amazon", "com.disney.disneyplus-prod"],
-  "topbar": [
-    {"label": "Inputs",   "icon": "inputs",   "action": "inputs"},
-    {"label": "Settings", "icon": "settings", "app": "com.palm.app.settings"}
-  ],
-  "hidden": []
-}
-```
+- **Hold OK on an app** (or press and hold with the pointer) for its menu: add it to the dock or replace a
+  dock app, move it left or right within the dock, remove it from the dock, or hide it.
+- **Hold OK on a top button** to remove it.
+- **The Customise button** (top right) has: top buttons (remove, or add Inputs, Settings or any app),
+  hidden apps (show them again) and a reset to the defaults.
 
-- **`dock`**: up to four app ids, in order. List ids with
-  `luna-send -n 1 -f luna://com.webos.applicationManager/listApps '{}' | grep '"id"'`.
-- **`topbar`**: the buttons at the top right. Each needs a `label` and an `icon`, plus either
-  `"app": "<app id>"` (optional `"params": {...}`) or `"action": "inputs"` / `"action": "restore"`.
-  Icons: `inputs`, `settings`, `wifi`, `home`, `power`, `search`, `tv`, `grid`, `restore`, `play`, `star`.
-- **`hidden`**: app ids to leave out of the grid.
+Choices are saved on the TV in `/media/developer/cleanyourtv/config.json` and survive reboots and
+reinstalls. You can still edit that file (or copy `config.example.json` there) if you prefer; it holds
+`dock` (up to four app ids), `topbar` (buttons with `label`, `icon` and either `app` or `action`) and `hidden`.
 
 ## The debloat
 

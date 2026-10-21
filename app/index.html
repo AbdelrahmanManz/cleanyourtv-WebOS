@@ -2,126 +2,106 @@
 <html><head><meta charset="utf-8"><title>Home</title>
 <meta name="viewport" content="width=1920">
 <style>
+/* Built for a weak TV GPU: only transform and opacity ever animate; no blur, masks or filters. */
 :root{
   --ink:#f5f6f8; --ink2:rgba(245,246,248,.62); --night:#07080b; --panel:#14161b;
-  --ease:cubic-bezier(.16,1,.3,1);
   --font:"LG Smart UI","Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 *{box-sizing:border-box;margin:0}
-html,body{width:1920px;height:1080px;overflow:hidden;background:var(--night);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased}
+html,body{width:1920px;height:1080px;overflow:hidden;background:var(--night);color:var(--ink);font-family:var(--font)}
 ::selection{background:rgba(255,255,255,.25)}
 
-/* ambient light: two layers cross-fade when the focused app changes */
-.glow{position:absolute;inset:0;opacity:0;transition:opacity .7s ease-out;
-  background:
-    radial-gradient(ellipse 1500px 820px at 26% -10%,rgba(var(--c),.58),transparent 68%),
-    radial-gradient(ellipse 900px 600px at 92% 4%,rgba(var(--c),.20),transparent 70%)}
+.glow{position:absolute;left:0;top:0;width:1920px;height:720px;opacity:0;transition:opacity .35s linear;will-change:opacity;
+  background:radial-gradient(ellipse 1400px 640px at 26% -6%,rgba(var(--c),.55),transparent 70%)}
 .glow.on{opacity:1}
-#floor{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 55%,rgba(0,0,0,.55))}
 
-/* top bar */
 #top{position:absolute;left:96px;right:96px;top:52px;height:76px;display:flex;align-items:center;z-index:5}
 #time{font-size:56px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
 #date{font-size:24px;color:var(--ink2);margin-left:22px;padding-top:14px}
 #top .sp{flex:1}
+#bar{display:flex}
 .pill{display:flex;align-items:center;gap:14px;height:64px;padding:0 30px 0 24px;margin-left:16px;border-radius:32px;font-size:26px;font-weight:500;
-  background:rgba(255,255,255,.09);box-shadow:inset 0 0 0 1px rgba(255,255,255,.10);
-  transition:transform .25s var(--ease),background .2s,color .2s,box-shadow .25s}
+  background:rgba(255,255,255,.09);box-shadow:inset 0 0 0 1px rgba(255,255,255,.10);transition:transform .15s ease-out;will-change:transform}
 .pill svg{width:30px;height:30px;flex:none}
-.pill.f{background:var(--ink);color:#0b0c10;transform:scale(1.07);box-shadow:0 14px 34px rgba(0,0,0,.45)}
+.pill.f{background:var(--ink);color:#0b0c10;transform:scale(1.07)}
 
-/* shelf */
-#shelf{position:absolute;left:96px;right:96px;top:168px;height:110px;z-index:5}
-#name{font-size:92px;font-weight:700;letter-spacing:-.028em;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  text-shadow:0 4px 30px rgba(0,0,0,.35)}
-#name.swap{animation:nameIn .45s var(--ease)}
-@keyframes nameIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+#shelf{position:absolute;left:96px;right:96px;top:162px;height:120px;z-index:5}
+#name{font-size:92px;font-weight:700;letter-spacing:-.028em;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-/* scrolling content, softly faded where it slides under the shelf */
-#view{position:absolute;inset:0;z-index:2;
-  -webkit-mask-image:linear-gradient(to bottom,transparent 0,transparent 290px,#000 390px);
-          mask-image:linear-gradient(to bottom,transparent 0,transparent 290px,#000 390px)}
-#scroll{position:absolute;left:0;top:0;width:1920px;height:1080px;transition:transform .55s var(--ease)}
-#dock{position:absolute;left:96px;top:410px;display:flex;gap:32px}
-#grid{position:absolute;left:96px;top:740px;width:1728px;display:grid;grid-template-columns:repeat(10,151px);gap:26px 24px}
+/* the view clips rows as they scroll up under the shelf */
+#view{position:absolute;left:0;top:300px;width:1920px;height:780px;overflow:hidden;z-index:2}
+#scroll{position:absolute;left:0;top:0;width:1920px;height:780px;transition:transform .3s ease-out;will-change:transform}
+#dock{position:absolute;left:96px;top:110px;display:flex;gap:32px}
+#grid{position:absolute;left:96px;top:440px;width:1728px;display:grid;grid-template-columns:repeat(10,151px);gap:26px 24px}
 
-.tile{--c:74,84,112;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;
+.tile{--c:74,84,112;position:relative;display:flex;align-items:center;justify-content:center;will-change:transform;
   background:linear-gradient(150deg,rgba(var(--c),.66),rgba(var(--c),.20) 72%),var(--panel);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 1px rgba(255,255,255,.05),0 10px 22px rgba(0,0,0,.35);
-  transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
-.tile img{position:relative;z-index:1;object-fit:contain;filter:drop-shadow(0 8px 14px rgba(0,0,0,.4))}
-.tile svg{position:relative;z-index:1;fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
-.tile .t{position:relative;z-index:1;font-size:26px;font-weight:600;padding:12px;text-align:center;line-height:1.15;opacity:.9}
-.tile::after{content:"";position:absolute;inset:0;z-index:2;opacity:0;pointer-events:none;
-  background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.20) 50%,transparent 62%) -120% 0/260% 100% no-repeat}
-.tile.f{z-index:3;outline:4px solid rgba(255,255,255,.95);outline-offset:4px}
-.tile.f::after{opacity:1;animation:sheen 1s var(--ease) forwards}
-@keyframes sheen{to{background-position:120% 0}}
-
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14);transition:transform .15s ease-out}
+.tile img{object-fit:contain}
+.tile svg{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
+.tile .t{font-size:26px;font-weight:600;padding:12px;text-align:center;line-height:1.15;opacity:.9}
+.tile.f{z-index:3;outline:4px solid rgba(255,255,255,.95);outline-offset:4px;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 24px 36px rgba(0,0,0,.6)}
 #dock .tile{width:408px;height:230px;border-radius:36px}
 #dock .tile img{height:56%;max-width:46%}
 #dock .tile svg{width:96px;height:96px}
-#dock .tile.f{transform:translateY(-12px) scale(1.06);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 44px 70px -16px rgba(0,0,0,.75),0 20px 34px rgba(0,0,0,.5)}
+#dock .tile.f{transform:translateY(-10px) scale(1.05)}
 #grid .tile{height:151px;border-radius:34px}
 #grid .tile img{width:64%;height:64%}
 #grid .tile svg{width:64px;height:64px}
-#grid .tile.f{transform:scale(1.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 28px 46px -12px rgba(0,0,0,.75),0 14px 26px rgba(0,0,0,.5)}
+#grid .tile.f{transform:scale(1.12)}
 #grid .tile.sys{background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
 
-.intro #dock .tile{animation:rise .9s var(--ease) backwards;animation-delay:calc(var(--i)*80ms)}
-.intro #grid .tile{animation:rise .9s var(--ease) backwards;animation-delay:calc(260ms + var(--i)*18ms)}
-@keyframes rise{from{opacity:0;transform:translateY(34px) scale(.96)}to{opacity:1;transform:none}}
-
-#toast{position:absolute;bottom:44px;left:50%;transform:translateX(-50%);z-index:20;padding:16px 34px;border-radius:30px;font-size:24px;
-  background:rgba(20,22,27,.92);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 14px 40px rgba(0,0,0,.5);opacity:0;transition:opacity .3s;pointer-events:none}
+#toast{position:absolute;bottom:44px;left:50%;transform:translateX(-50%);z-index:40;padding:16px 34px;border-radius:30px;font-size:24px;
+  background:#14161b;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);opacity:0;pointer-events:none}
 #toast.on{opacity:1}
 
-/* inputs picker */
-#ov{position:absolute;inset:0;z-index:30;background:rgba(5,6,9,.82);display:flex;align-items:center;justify-content:center;animation:fade .25s ease-out}
-@keyframes fade{from{opacity:0}}
-#ov .panel{width:700px;display:flex;flex-direction:column;gap:14px}
-#ov h2{font-size:48px;font-weight:700;letter-spacing:-.02em;margin-bottom:18px}
-.row{display:flex;align-items:center;gap:22px;height:92px;padding:0 34px;border-radius:26px;font-size:30px;font-weight:500;
-  background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);transition:transform .25s var(--ease),background .2s,color .2s}
-.row svg{width:36px;height:36px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.row .lb{flex:1}
+/* menus */
+#ov{position:absolute;left:0;top:0;width:1920px;height:1080px;z-index:30;background:rgba(5,6,9,.9);display:flex;align-items:center;justify-content:center}
+#ov .panel{width:760px;display:flex;flex-direction:column;gap:12px}
+#ov h2{font-size:46px;font-weight:700;letter-spacing:-.02em;margin-bottom:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row{display:flex;align-items:center;gap:22px;height:84px;padding:0 34px;border-radius:26px;font-size:30px;font-weight:500;
+  background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.row svg{width:34px;height:34px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.row .lb{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .row .st{font-size:22px;opacity:.65}
-.row.f{background:var(--ink);color:#0b0c10;transform:scale(1.04)}
+.row.f{background:var(--ink);color:#0b0c10}
+.more{height:22px;text-align:center;font-size:20px;color:var(--ink2)}
 </style></head><body>
-<div class="glow" id="gA"></div><div class="glow" id="gB"></div><div id="floor"></div>
+<div class="glow" id="gA"></div><div class="glow" id="gB"></div>
 <div id="top"><div id="time"></div><div id="date"></div><div class="sp"></div><div id="bar"></div></div>
 <div id="shelf"><div id="name"></div></div>
 <div id="view"><div id="scroll"><div id="dock"></div><div id="grid"></div></div></div>
 <div id="toast"></div>
 <script>
-var API='http://127.0.0.1:8765';
+var API='http://127.0.0.1:8765', CACHE_KEY='cytv.cache.v1';
 var DEFAULTS={
   dock:['netflix','youtube.leanback.v4','amazon','com.disney.disneyplus-prod'],
   topbar:[{label:'Inputs',icon:'inputs',action:'inputs'},{label:'Settings',icon:'settings',app:'com.palm.app.settings'}]
 };
+var PRESETS=[
+  {label:'Inputs',icon:'inputs',action:'inputs'},
+  {label:'Settings',icon:'settings',app:'com.palm.app.settings'}
+];
 var ICONS={
   inputs:'<path d="M15 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/>',
   settings:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
-  wifi:'<path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/>',
-  home:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>',
-  power:'<path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10"/>',
-  search:'<circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>',
+  edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
   tv:'<rect x="2" y="7" width="20" height="15" rx="2"/><path d="M17 2l-5 5-5-5"/>',
   grid:'<path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/>',
-  restore:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
-  play:'<circle cx="12" cy="12" r="10"/><path d="M10 8l6 4-6 4z"/>',
-  star:'<path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>'
+  restore:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>'
 };
 function svg(name){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+(ICONS[name]||ICONS.grid)+'</svg>'}
 
-var rows=[], r=1, c=0, colorCache={}, lastSig='', ov=null, oi=0, gSide=0, intro=true;
+var apps=[], cfg={}, rows=[], r=1, c=0, colors={}, tiles={}, lastSig='', gSide=0, gColor='', gT=0, saveT=0;
 function $(id){return document.getElementById(id)}
 var toastT;
 function toast(t){var e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(function(){e.classList.remove('on')},4000)}
 function api(p,body){return fetch(API+p,body?{method:'POST',body:JSON.stringify(body)}:{}).then(function(x){return x.json()})}
 function launch(id,params){api('/api/launch',{id:id,params:params}).then(function(x){if(x&&x.returnValue===false)toast('Could not open '+id)})}
+function store(){try{localStorage.setItem(CACHE_KEY,JSON.stringify({apps:apps,cfg:cfg,colors:colors}))}catch(e){}}
+function storeSoon(){clearTimeout(saveT);saveT=setTimeout(store,1500)}
 
-/* ---------- colour ---------- */
+/* ---------- colour (extracted once per app, then remembered) ---------- */
 function hsl2rgb(h,s,l){var a=s*Math.min(l,1-l);function f(n){var k=(n+h/30)%12;return Math.round(255*(l-a*Math.max(-1,Math.min(k-3,9-k,1))))}return [f(0),f(8),f(4)]}
 function rgb2hsl(R,G,B){R/=255;G/=255;B/=255;var mx=Math.max(R,G,B),mn=Math.min(R,G,B),l=(mx+mn)/2,h=0,s=0,d=mx-mn;
   if(d){s=d/(1-Math.abs(2*l-1));h=mx===R?((G-B)/d+(G<B?6:0)):mx===G?(B-R)/d+2:(R-G)/d+4;h*=60}return [h,s,l]}
@@ -129,46 +109,60 @@ function hashHue(id){var h=0;for(var i=0;i<id.length;i++)h=(h*31+id.charCodeAt(i
 function iconColor(img,id){
   var out=null;
   try{
-    var cv=document.createElement('canvas');cv.width=cv.height=24;var x=cv.getContext('2d');x.drawImage(img,0,0,24,24);
-    var d=x.getImageData(0,0,24,24).data,R=0,G=0,B=0,W=0;
+    var cv=document.createElement('canvas');cv.width=cv.height=16;var x=cv.getContext('2d');x.drawImage(img,0,0,16,16);
+    var d=x.getImageData(0,0,16,16).data,R=0,G=0,B=0,W=0;
     for(var i=0;i<d.length;i+=4){var a=d[i+3]/255;if(a<.4)continue;var hs=rgb2hsl(d[i],d[i+1],d[i+2]);var w=a*(.15+hs[1]*hs[1]);R+=d[i]*w;G+=d[i+1]*w;B+=d[i+2]*w;W+=w}
     if(W>0.5){var h=rgb2hsl(R/W,G/W,B/W);if(h[1]>.22)out=hsl2rgb(h[0],Math.max(.5,Math.min(h[1],.8)),Math.max(.36,Math.min(h[2],.52)))}
   }catch(e){}
   return out||hsl2rgb(hashHue(id),.42,.42)}
-function applyColor(t){
-  var a=t._a;if(!a||a.sys)return;
-  var col=colorCache[a.id];
-  if(!col){var im=t.querySelector('img');if(!im||!im.complete||!im.naturalWidth)return;col=colorCache[a.id]=iconColor(im,a.id)}
-  t.style.setProperty('--c',col.join(','));
-  if(rows[r]&&rows[r][c]===t)glow(t)}
 
-/* ---------- tiles ---------- */
+/* ---------- tiles (built once per app, reused across rebuilds) ---------- */
 function tile(a){
+  if(tiles[a.id])return tiles[a.id];
   var d=document.createElement('div');d.className='tile'+(a.sys?' sys':'');d._a=a;
+  tiles[a.id]=d;hit(d);
   if(a.sys){d.innerHTML=svg(a.icon);return d}
-  var i=new Image();i.crossOrigin='anonymous';i.alt='';
-  i.onload=function(){applyColor(d)};
+  var known=colors[a.id];
+  if(known)d.style.setProperty('--c',known.join(','));
+  var i=new Image();i.alt='';i.decoding='async';
+  if(!known)i.crossOrigin='anonymous';
+  i.onload=function(){if(!colors[a.id]){colors[a.id]=iconColor(i,a.id);d.style.setProperty('--c',colors[a.id].join(','));storeSoon();if(rows[r]&&rows[r][c]===d)glowNow(d)}};
   i.onerror=function(){i.remove();var t=document.createElement('div');t.className='t';t.textContent=a.title;d.appendChild(t);
-    var h=hsl2rgb(hashHue(a.id),.42,.42);colorCache[a.id]=h;d.style.setProperty('--c',h.join(','))};
-  i.src=API+'/icon/'+a.id;d.appendChild(i);return d}
+    if(!colors[a.id]){colors[a.id]=hsl2rgb(hashHue(a.id),.42,.42);d.style.setProperty('--c',colors[a.id].join(','))}};
+  i.src=API+'/icon/'+encodeURIComponent(a.id);d.appendChild(i);
+  return d}
 
-function glow(t){
-  var col=t.style.getPropertyValue('--c')||'74,84,112';
+/* ---------- ambient glow: two layers cross-fade, updated only once focus settles ---------- */
+function glowNow(e){
+  var col=e.style.getPropertyValue('--c')||'74,84,112';
+  if(col===gColor)return;gColor=col;
   var on=gSide?$('gB'):$('gA'),off=gSide?$('gA'):$('gB');gSide^=1;
   on.style.setProperty('--c',col);on.classList.add('on');off.classList.remove('on')}
+function glowSoon(e){clearTimeout(gT);gT=setTimeout(function(){glowNow(e)},110)}
 
-function setFocus(nr,nc){
+function setFocus(nr,nc,first){
   var old=rows[r]&&rows[r][c];if(old)old.classList.remove('f');
   r=nr;c=Math.min(nc,rows[r].length-1);var e=rows[r][c];e.classList.add('f');
-  var a=e._a,nm=a?a.title:e.getAttribute('data-label');
-  var n=$('name');if(n.textContent!==nm){n.textContent=nm;n.classList.remove('swap');void n.offsetWidth;n.classList.add('swap')}
-  if(e.style.getPropertyValue('--c'))glow(e);else if(!e.classList.contains('pill')){/* colour pending */}else glow(e);
-  var g=$('grid'),sh=0;
-  if(r>=2){var top=740+e.offsetTop;sh=Math.min(0,Math.max(410-top,1000-(740+g.offsetHeight)))}
+  var a=e._a,nm=a?a.title:(e._o?e._o.label:''),n=$('name');
+  if(n.textContent!==nm)n.textContent=nm;
+  if(first)glowNow(e);else glowSoon(e);
+  var sh=0;
+  if(r>=2){var g=$('grid');sh=Math.min(0,Math.max(110-(440+e.offsetTop),760-(440+g.offsetHeight)))}
   $('scroll').style.transform=sh?'translateY('+sh+'px)':''}
-
 function mapCol(from,to,col){return from>1?Math.round(col*(to-1)/(from-1)):0}
-function move(nr,nc){setFocus(nr,nc)}
+function posOf(e){for(var i=0;i<rows.length;i++){var j=rows[i].indexOf(e);if(j>=0)return [i,j]}return null}
+
+/* ---------- config (edited in the launcher, saved through the helper) ---------- */
+function saveCfg(){api('/api/config',cfg).catch(function(){toast('Could not save settings')});store();rebuild()}
+function isHidden(id){return (cfg.hidden||[]).indexOf(id)>=0}
+function dockIds(){var by={};apps.forEach(function(a){by[a.id]=a});
+  var ids=cfg.dock&&cfg.dock.length?cfg.dock:DEFAULTS.dock;
+  return ids.filter(function(i){return by[i]&&!isHidden(i)}).slice(0,4)}
+function setDock(ids){cfg.dock=ids.slice(0,4);saveCfg()}
+function hideApp(id){cfg.hidden=(cfg.hidden||[]).concat(id);cfg.dock=dockIds().filter(function(i){return i!==id});saveCfg()}
+function unhideApp(id){cfg.hidden=(cfg.hidden||[]).filter(function(i){return i!==id});saveCfg()}
+function topbar(){return cfg.topbar?cfg.topbar:DEFAULTS.topbar}
+function title(id){for(var i=0;i<apps.length;i++)if(apps[i].id===id)return apps[i].title;return id}
 
 /* ---------- actions ---------- */
 function act(e){
@@ -177,67 +171,155 @@ function act(e){
     if(a.id==='__undo'){toast('Restoring LG Home (about 15 s, until next reboot)...');return void api('/api/undo',{})}
     return launch(a.id)}
   var o=e._o||{};
-  if(o.action==='inputs')return showInputs();
-  if(o.action==='restore'){toast('Restoring LG Home (about 15 s, until next reboot)...');return void api('/api/undo',{})}
+  if(o.action==='customize')return customizeMenu();
+  if(o.action==='inputs')return inputsMenu();
   if(o.app)launch(o.app,o.params)}
 
-function showInputs(){api('/api/inputs').then(function(x){
-  var dv=(x.devices||[]).filter(function(d){return d.appId});
-  ov=document.createElement('div');ov.id='ov';
-  var p='<div class="panel"><h2>Inputs</h2>';
-  dv.forEach(function(d,i){p+='<div class="row" data-i="'+i+'">'+svg('tv')+'<span class="lb"></span><span class="st">'+(d.hdmiPlugIn?'Connected':'')+'</span></div>'});
-  ov.innerHTML=p+'</div>';
-  document.body.appendChild(ov);
-  [].forEach.call(ov.querySelectorAll('.row'),function(b,i){b._d=dv[i];b.querySelector('.lb').textContent=dv[i].label;b.addEventListener('click',function(){pick(b)})});
-  oi=0;ovFocus(0)})}
-function ovFocus(i){var k=ov.querySelectorAll('.row');if(!k.length)return;oi=Math.max(0,Math.min(k.length-1,i));for(var j=0;j<k.length;j++)k[j].classList.toggle('f',j===oi)}
-function pick(b){closeOv();launch(b._d.appId)}
-function closeOv(){if(ov){ov.remove();ov=null}}
+/* ---------- menus ---------- */
+var stack=[], ovEl=null;
+function openMenu(title,items){stack.push({title:title,items:items,idx:0});drawMenu()}
+function closeMenus(){stack=[];if(ovEl){ovEl.remove();ovEl=null}}
+function backMenu(){stack.pop();if(stack.length)drawMenu();else closeMenus()}
+function drawMenu(){
+  var m=stack[stack.length-1],N=8,start=Math.max(0,Math.min(m.idx-3,m.items.length-N));
+  if(!ovEl){ovEl=document.createElement('div');ovEl.id='ov';document.body.appendChild(ovEl)}
+  var h='<div class="panel"><h2></h2><div class="more">'+(start>0?'▲':'')+'</div>';
+  for(var i=start;i<Math.min(m.items.length,start+N);i++){
+    var it=m.items[i];
+    h+='<div class="row'+(i===m.idx?' f':'')+'" data-i="'+i+'">'+(it.icon?svg(it.icon):'')+'<span class="lb"></span>'+(it.sub?'<span class="st"></span>':'')+'</div>'}
+  h+='<div class="more">'+(start+N<m.items.length?'▼':'')+'</div></div>';
+  ovEl.innerHTML=h;
+  ovEl.querySelector('h2').textContent=m.title;
+  [].forEach.call(ovEl.querySelectorAll('.row'),function(row){
+    var it=m.items[+row.getAttribute('data-i')];
+    row.querySelector('.lb').textContent=it.label;
+    if(it.sub)row.querySelector('.st').textContent=it.sub;
+    row.addEventListener('click',function(){m.idx=+row.getAttribute('data-i');pickMenu()})})}
+function pickMenu(){var m=stack[stack.length-1],it=m.items[m.idx];if(it&&it.fn){var n=stack.length;it.fn();if(stack.length===n&&!it.stay)closeMenus()}}
+function menuKey(k){
+  var m=stack[stack.length-1];
+  if(k===38&&m.idx>0){m.idx--;drawMenu()}
+  else if(k===40&&m.idx<m.items.length-1){m.idx++;drawMenu()}
+  else if(k===13)pickMenu();
+  else if(k===461||k===27||k===8)backMenu();
+  else return false;
+  return true}
 
-function hit(e){e.addEventListener('click',function(){act(e)});e.addEventListener('mouseenter',function(){for(var i=0;i<rows.length;i++){var j=rows[i].indexOf(e);if(j>=0){setFocus(i,j);return}}})}
+function inputsMenu(){api('/api/inputs').then(function(x){
+  var items=(x.devices||[]).filter(function(d){return d.appId}).map(function(d){
+    return {icon:'tv',label:d.label,sub:d.hdmiPlugIn?'Connected':'',fn:function(){launch(d.appId)}}});
+  openMenu('Inputs',items)})}
+
+function appMenu(a){
+  var di=dockIds(),pos=di.indexOf(a.id),items=[{label:'Open',fn:function(){launch(a.id)}}];
+  if(pos>=0){
+    if(pos>0)items.push({label:'Move left in dock',fn:function(){var d=di.slice();d.splice(pos,1);d.splice(pos-1,0,a.id);setDock(d)}});
+    if(pos<di.length-1)items.push({label:'Move right in dock',fn:function(){var d=di.slice();d.splice(pos,1);d.splice(pos+1,0,a.id);setDock(d)}});
+    items.push({label:'Remove from dock',fn:function(){setDock(di.filter(function(i){return i!==a.id}))}})}
+  else if(di.length<4)items.push({label:'Add to dock',fn:function(){setDock(di.concat(a.id))}});
+  else items.push({label:'Add to dock...',stay:true,fn:function(){
+    openMenu('Replace which app?',di.map(function(id,i){return {label:title(id),fn:function(){var d=di.slice();d[i]=a.id;setDock(d)}}}))}});
+  items.push({label:'Hide app',fn:function(){hideApp(a.id)}});
+  openMenu(a.title,items)}
+
+function removeButton(o){cfg.topbar=topbar().filter(function(b){return b!==o});saveCfg()}
+function barMenu(o){openMenu(o.label,[{label:'Remove this button',fn:function(){removeButton(o)}}])}
+
+function customizeMenu(){
+  openMenu('Customise',[
+    {icon:'grid',label:'Dock',sub:'hold OK on an app',stay:true,fn:function(){toast('Hold OK on any app to change the dock')}},
+    {icon:'settings',label:'Top buttons',stay:true,fn:topButtonsMenu},
+    {icon:'edit',label:'Hidden apps',stay:true,fn:hiddenMenu},
+    {icon:'restore',label:'Reset dock, buttons and hidden apps',fn:function(){cfg={};saveCfg()}}])}
+function topButtonsMenu(){
+  var items=topbar().map(function(o){return {label:o.label,sub:'OK to remove',fn:function(){removeButton(o)}}});
+  items.push({label:'Add a button...',stay:true,fn:addButtonMenu});
+  openMenu('Top buttons',items)}
+function addButtonMenu(){
+  var items=PRESETS.map(function(p){return {icon:p.icon,label:p.label,fn:function(){cfg.topbar=topbar().concat([p]);saveCfg()}}});
+  items.push({label:'An app...',stay:true,fn:function(){
+    openMenu('Pick an app',apps.slice().sort(function(a,b){return a.title.localeCompare(b.title)}).map(function(a){
+      return {label:a.title,fn:function(){cfg.topbar=topbar().concat([{label:a.title,icon:'grid',app:a.id}]);saveCfg()}}}))}});
+  openMenu('Add a button',items)}
+function hiddenMenu(){
+  var h=(cfg.hidden||[]).filter(function(id){return apps.some(function(a){return a.id===id})});
+  if(!h.length)return toast('No hidden apps');
+  openMenu('Hidden apps (OK to show again)',h.map(function(id){return {label:title(id),fn:function(){unhideApp(id)}}}))}
 
 /* ---------- layout ---------- */
-function layout(apps,cfg){
-  cfg=cfg||{};
-  var dockIds=cfg.dock&&cfg.dock.length?cfg.dock:DEFAULTS.dock;
+function rebuild(){
   var by={};apps.forEach(function(a){by[a.id]=a});
-  var dock=dockIds.map(function(i){return by[i]}).filter(Boolean).slice(0,4);
-  var rest=apps.filter(function(a){return dock.indexOf(a)<0}).sort(function(a,b){return a.title.localeCompare(b.title)});
+  var di=dockIds(),dock=di.map(function(i){return by[i]});
+  var rest=apps.filter(function(a){return !isHidden(a.id)&&di.indexOf(a.id)<0}).sort(function(a,b){return a.title.localeCompare(b.title)});
   rest.push({id:'__undo',title:'Restore LG Home',sys:true,icon:'restore'});
-  $('dock').innerHTML='';$('grid').innerHTML='';$('bar').innerHTML='';
-  var d=dock.map(function(a,i){var t=tile(a);t.style.setProperty('--i',i);$('dock').appendChild(t);return t});
-  var g=rest.map(function(a,i){var t=tile(a);t.style.setProperty('--i',i);$('grid').appendChild(t);return t});
-  $('bar').style.display='flex';
-  var tb=(cfg.topbar&&cfg.topbar.length?cfg.topbar:DEFAULTS.topbar).map(function(o){
-    var p=document.createElement('div');p.className='pill';p._o=o;p.setAttribute('data-label',o.label||'');
-    p.innerHTML=svg(o.icon)+'<span></span>';p.lastChild.textContent=o.label||'';$('bar').appendChild(p);return p});
+  var oldE=rows[r]&&rows[r][c],keep=oldE&&oldE._a?oldE._a.id:null;
+  if(oldE)oldE.classList.remove('f');
+  var dk=$('dock'),gd=$('grid'),bar=$('bar');
+  dk.textContent='';gd.textContent='';bar.textContent='';
+  var d=dock.map(function(a){var t=tile(a);dk.appendChild(t);return t});
+  var g=rest.map(function(a){var t=tile(a);gd.appendChild(t);return t});
+  var tb=topbar().concat([{label:'Customise',icon:'edit',action:'customize',fixed:true}]).map(function(o){
+    var p=document.createElement('div');p.className='pill';p._o=o;p.innerHTML=svg(o.icon)+'<span></span>';p.lastChild.textContent=o.label||'';
+    hit(p);bar.appendChild(p);return p});
   rows=[tb,d.length?d:tb];
   for(var i=0;i<g.length;i+=10)rows.push(g.slice(i,i+10));
-  rows.forEach(function(x){x.forEach(hit)});
-  document.body.classList.toggle('intro',intro);intro=false;
-  setFocus(Math.min(r,rows.length-1),c);
-  [].forEach.call(document.querySelectorAll('.tile'),applyColor)}
+  var nr=Math.min(r,rows.length-1),nc=c;
+  if(keep&&tiles[keep]){var p=posOf(tiles[keep]);if(p){nr=p[0];nc=p[1]}}
+  setFocus(nr,nc,true)}
 
 function load(){api('/api/apps').then(function(x){
   var sig=JSON.stringify([x.apps.map(function(a){return a.id}),x.config]);
-  if(sig===lastSig)return;lastSig=sig;layout(x.apps,x.config)
+  if(sig===lastSig)return;lastSig=sig;
+  apps=x.apps.map(function(a){return {id:a.id,title:a.title}});cfg=x.config||{};store();rebuild()
 }).catch(function(){toast('Helper not reachable, retrying...');setTimeout(load,3000)})}
 
-/* ---------- keys ---------- */
+/* ---------- input: tap OK to open, hold OK for options ---------- */
+var downT=0,held=false,downEnter=false,swallowUp=false,pressT=0,lastKey=0,lastMX=-1,lastMY=-1;
+function hit(e){
+  e.addEventListener('mousedown',function(){held=false;clearTimeout(pressT);pressT=setTimeout(function(){held=true;options(e)},650)});
+  e.addEventListener('mouseup',function(){clearTimeout(pressT)});
+  e.addEventListener('click',function(){if(held){held=false;return}act(e)})}
+function options(e){
+  if(e._a&&!e._a.sys)appMenu(e._a);
+  else if(e._o&&!e._o.fixed)barMenu(e._o)}
+
+/* Pointer focus follows real pointer movement only: a tile sliding under a still cursor, a cursor jitter when
+   the remote is picked up, or a pointer move right after a button press must not steal the focus. */
+document.addEventListener('mousemove',function(ev){
+  if(stack.length||Date.now()-lastKey<1500)return;
+  if(lastMX<0){lastMX=ev.clientX;lastMY=ev.clientY;return}
+  if(Math.abs(ev.clientX-lastMX)+Math.abs(ev.clientY-lastMY)<24)return;
+  lastMX=ev.clientX;lastMY=ev.clientY;
+  var el=ev.target.closest?ev.target.closest('.tile,.pill'):null,p=el&&posOf(el);
+  if(p&&!(p[0]===r&&p[1]===c))setFocus(p[0],p[1])});
+
 document.addEventListener('keydown',function(e){
-  var k=e.keyCode;
-  if(ov){if(k===38)ovFocus(oi-1);else if(k===40)ovFocus(oi+1);else if(k===13)pick(ov.querySelectorAll('.row')[oi]);else if(k===461||k===27||k===8)closeOv();else return;e.preventDefault();return}
+  var k=e.keyCode;lastKey=Date.now();
+  if(stack.length){if(menuKey(k)){if(k===13)swallowUp=true;e.preventDefault()}return}
   var len=rows[r].length;
   if(k===37&&c>0)setFocus(r,c-1);
   else if(k===39&&c<len-1)setFocus(r,c+1);
   else if(k===38&&r>0)setFocus(r-1,mapCol(len,rows[r-1].length,c));
   else if(k===40&&r<rows.length-1)setFocus(r+1,mapCol(len,rows[r+1].length,c));
-  else if(k===13)act(rows[r][c]);
-  else return;e.preventDefault()});
+  else if(k===13){
+    if(!e.repeat){downEnter=true;held=false;clearTimeout(downT);var t=rows[r][c];downT=setTimeout(function(){held=true;options(t)},650)}}
+  else return;
+  e.preventDefault()});
+document.addEventListener('keyup',function(e){
+  if(e.keyCode!==13)return;
+  lastKey=Date.now();clearTimeout(downT);
+  if(swallowUp){swallowUp=false;downEnter=false;return}
+  if(downEnter&&!held)act(rows[r][c]);
+  downEnter=false;held=false});
 document.addEventListener('webOSRelaunch',load);
 document.addEventListener('visibilitychange',function(){if(!document.hidden)load()});
 
 function tick(){var d=new Date();$('time').textContent=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
   $('date').textContent=d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}
-setInterval(tick,10000);tick();load();
+setInterval(tick,15000);tick();
+
+/* first paint straight from the last known layout, then refresh from the helper */
+try{var cached=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');
+  if(cached&&cached.apps&&cached.apps.length){apps=cached.apps;cfg=cached.cfg||{};colors=cached.colors||{};rebuild()}}catch(e){}
+load();
 </script></body></html>

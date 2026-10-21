@@ -79,7 +79,7 @@ main() {
     say "starting (the screen blinks once while the system app manager restarts)"
     sh $D/10-cleanyourtv-home </dev/null
     [ $DEBLOAT = 1 ] && sh $D/debloat-stop.sh </dev/null
-    say "done. Edit $D/config.json to choose your dock and top buttons."
+    say "done. Hold OK on an app to customise the dock, or use the Customise button at the top right."
   else
     say "done. Everything takes effect at the next reboot."
   fi
