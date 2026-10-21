@@ -49,13 +49,22 @@ Options go after `sh -s --`:
 |---|---|
 | `--no-debloat` | Install the launcher only; leave LG's services and the hosts file alone. |
 | `--no-start` | Install, but only take effect at the next reboot. |
+| `--no-verify` | Skip the post-install check (see below) and the automatic rollback. |
+| `--force` | Continue even if LG's Home app looks different from what the installer expects. |
 
 ```sh
 ssh root@192.168.1.50 'curl -fsSL https://raw.githubusercontent.com/lasharor/cleanyourtv-WebOS/main/install.sh | sh -s -- --no-debloat'
 ```
 
-The screen blinks once while the system app manager (`sam`) restarts, then the new Home appears. The
-installer is safe to run again; it updates the launcher and keeps your `config.json`.
+The screen blinks once while the system app manager (`sam`) restarts, then the new Home appears.
+
+**It checks its own work.** After starting, the installer waits for the new Home to be registered with the
+system and for the helper to answer with the matching version. If that does not happen within two minutes
+it restores LG's Home and removes the boot scripts, so a failed install leaves the TV as it was. It also
+prints your TV model and firmware, and warns if it is not a webOS 25 TV (the only one tried so far).
+
+**Updating:** run the same one-liner again, or `sh /media/developer/cleanyourtv/update.sh` on the TV. Your
+settings and usage history are kept. If the launcher and helper versions ever differ, the launcher says so.
 
 ### What the installer does
 
@@ -76,11 +85,17 @@ Everything is changed in the launcher itself; there is nothing to edit by hand.
   dock app, move it left or right within the dock, remove it from the dock, or hide it.
 - **Hold OK on a top button** to remove it.
 - **The Customise button** (top right) has: top buttons (remove, or add Inputs, Settings or any app),
-  hidden apps (show them again) and a reset to the defaults.
+  hidden apps (show them again), the app order and a reset to the defaults.
+
+**App order.** The grid sorts itself by how often you use each app, most used first, so the apps you open
+all the time float to the front. Usage is counted by the helper whenever an app stays in the foreground for a
+few seconds (however it was started, including the Netflix button on the remote), and older use counts for
+less (half-life 30 days). Switch to A to Z in Customise. The dock is always yours: it never reorders itself.
 
 Choices are saved on the TV in `/media/developer/cleanyourtv/config.json` and survive reboots and
 reinstalls. You can still edit that file (or copy `config.example.json` there) if you prefer; it holds
-`dock` (up to four app ids), `topbar` (buttons with `label`, `icon` and either `app` or `action`) and `hidden`.
+`dock` (up to four app ids), `topbar` (buttons with `label`, `icon` and either `app` or `action`), `hidden`
+and `sort` (`usage` or `alpha`).
 
 ## The debloat
 
@@ -103,7 +118,7 @@ If an app misbehaves, `touch /media/developer/cleanyourtv/DISABLE-DEBLOAT` and r
 | From the launcher | Select **Restore LG Home**, the last tile in the grid. Stock Home returns in about 15 s, until the next reboot. |
 | Over SSH, until next reboot | `sh /media/developer/cleanyourtv/undo-home.sh temp` |
 | Over SSH, permanently (boot scripts stay installed but do nothing) | `sh /media/developer/cleanyourtv/undo-home.sh`; remove the `DISABLE` file to switch back on. |
-| Remove everything | `sh /media/developer/cleanyourtv/uninstall.sh` (add `--keep-config` to keep `config.json`). |
+| Remove everything | `sh /media/developer/cleanyourtv/uninstall.sh` (add `--keep-config` to keep your settings and usage history). |
 | TV shows a black screen and SSH still works | Run the second command above. |
 | Boot crashed | The Homebrew Channel's failsafe mode skips all boot scripts; reboot again. |
 
