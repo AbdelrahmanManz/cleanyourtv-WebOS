@@ -85,7 +85,14 @@ Everything is changed in the launcher itself; there is nothing to edit by hand.
   dock app, move it left or right within the dock, remove it from the dock, or hide it.
 - **Hold OK on a top button** to remove it.
 - **The Customise button** (top right) has: top buttons (remove, or add Inputs, Settings or any app),
-  hidden apps (show them again), the app order and a reset to the defaults.
+  hidden apps (show them again), the app order, the clock format and a reset to the defaults.
+
+**Language and clock.** Menus, buttons and the date follow the TV's language (English, Dutch, German, French
+and Spanish are translated; anything else shows English, with the date in the TV's own language). The clock
+uses the 24- or 12-hour format of that language, or whatever you pick under Customise → Clock.
+
+**Inputs.** The Inputs picker lists every HDMI port with the name of the device on it (for example your
+soundbar or console) and whether it is connected or the active source.
 
 **App order.** The grid sorts itself by how often you use each app, most used first, so the apps you open
 all the time float to the front. Usage is counted by the helper whenever an app stays in the foreground for a

@@ -88,6 +88,7 @@ http.createServer(async (req, res) => {
       if (strs(b.dock)) out.dock = strs(b.dock).slice(0, 4);
       if (strs(b.hidden)) out.hidden = strs(b.hidden);
       if (b.sort === 'usage' || b.sort === 'alpha') out.sort = b.sort;
+      if (['auto', '24', '12'].includes(b.clock)) out.clock = b.clock;
       if (Array.isArray(b.topbar)) out.topbar = b.topbar.slice(0, 12).filter(o => o && typeof o.label === 'string').map(o => {
         const t = { label: o.label.slice(0, 40), icon: String(o.icon || 'grid').slice(0, 20) };
         if (typeof o.action === 'string') t.action = o.action; if (typeof o.app === 'string') t.app = o.app;
