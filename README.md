@@ -130,6 +130,42 @@ OK on it to put it in the dock). It does not touch LG's own tuner or its channel
 The README, the repository and the installer never contain a playlist address: it lives only in
 `/media/developer/cleanyourtv/live/` on your TV and is removed by the uninstaller.
 
+## Notifications with a picture
+
+LG's own toasts are text only on this TV: I tried `iconUrl` and `remoteIconUrl` with web addresses, local files
+and LG's own icon, and none showed a picture. So the installer adds a tiny transparent window (the
+`com.cleanyourtv.notify` app) that shows a card with a picture on top of whatever is on screen. In testing it
+appeared over Plex and over Prime Video (DRM video) without interrupting playback, and the remote keeps
+controlling the app underneath (the window type `topui` is what makes that work: `overlay` and `popup` windows
+steal the remote).
+
+Send one from any computer, script, Home Assistant or camera automation on your network:
+
+```sh
+curl -X POST http://<tv-ip>:8765/api/notify -d '{"title":"Front door","text":"Someone is at the door","image":"http://192.168.1.20/snapshot.jpg","seconds":15,"position":"top-right"}'
+```
+
+The helper only listens on the TV itself, so from another machine go through SSH:
+`ssh root@<tv-ip> "curl -s -X POST localhost:8765/api/notify -d '{...}'"`.
+
+| Field | Meaning |
+|---|---|
+| `title`, `text` | Up to 120 and 400 characters. Either can be empty. |
+| `image` | `http(s)` address of a picture (up to 6 MB; self-signed certificates are accepted). The helper downloads it first, so the card appears complete. |
+| `seconds` | How long it stays, 2 to 120 (default 8). |
+| `position` | `top|middle|bottom` and `left|center|right`, for example `bottom-center` (default `top-right`). |
+
+Home Assistant example (`configuration.yaml`, with an SSH-capable `shell_command`):
+
+```yaml
+shell_command:
+  tv_notify: >-
+    ssh -i /config/tv_key -o StrictHostKeyChecking=no root@192.168.1.50
+    "curl -s -X POST localhost:8765/api/notify -d '{\"title\":\"{{ title }}\",\"text\":\"{{ text }}\",\"image\":\"{{ image }}\"}'"
+```
+
+Skip the overlay with `--no-notify` when installing. The uninstaller removes it.
+
 ## The debloat
 
 Unless you pass `--no-debloat`, about a minute after every boot the script:

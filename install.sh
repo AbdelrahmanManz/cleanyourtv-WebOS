@@ -6,6 +6,7 @@
 #   curl -fsSL .../install.sh | sh -s -- --no-start       # install, but only take effect on the next reboot
 #   curl -fsSL .../install.sh | sh -s -- --no-verify      # skip the post-install check and automatic rollback
 #   curl -fsSL .../install.sh | sh -s -- --force          # continue even if this TV looks unsupported
+#   curl -fsSL .../install.sh | sh -s -- --no-notify      # do not install the picture-notification overlay
 #
 # Environment: CYTV_REPO=owner/name  CYTV_REF=branch  CYTV_SRC=/path/to/repo-checkout (use a local copy instead of downloading)
 
@@ -15,14 +16,15 @@ main() {
   D=/media/developer/cleanyourtv
   INITD=/var/lib/webosbrew/init.d
   TESTED_SDK="10."          # firmware this has been tried on: webOS 25 (sdkVersion 10.x)
-  DEBLOAT=1; START=1; VERIFY=1; FORCE=0
+  DEBLOAT=1; START=1; VERIFY=1; FORCE=0; NOTIFY=1
   for a in "$@"; do
     case "$a" in
       --no-debloat) DEBLOAT=0 ;;
       --no-start) START=0 ;;
       --no-verify) VERIFY=0 ;;
       --force) FORCE=1 ;;
-      -h|--help) sed -n '2,10p' "$0" 2>/dev/null; return 0 ;;
+      --no-notify) NOTIFY=0 ;;
+      -h|--help) sed -n '2,11p' "$0" 2>/dev/null; return 0 ;;
       *) echo "unknown option: $a"; return 1 ;;
     esac
   done
@@ -31,6 +33,18 @@ main() {
   say() { echo "[cleanyourtv] $*"; }
   warn() { echo "[cleanyourtv] WARNING: $*" >&2; }
   die() { echo "[cleanyourtv] ERROR: $*" >&2; exit 1; }
+  install_notify() {
+    python3 $D/build-ipk.py $D/notify-app /tmp/cytv-notify.ipk || { warn "could not build the notification app"; return; }
+    # right after the system app manager restarts an install can be silently dropped, so check and retry
+    n=0
+    while [ $n -lt 4 ]; do
+      luna-send -n 1 -w 30000 -f luna://com.webos.appInstallService/dev/install '{"id":"com.cleanyourtv.notify","ipkUrl":"/tmp/cytv-notify.ipk","subscribe":false}' </dev/null >/dev/null 2>&1
+      sleep 6
+      luna-send -n 1 -w 5000 -f luna://com.webos.applicationManager/getAppInfo '{"id":"com.cleanyourtv.notify"}' </dev/null 2>/dev/null | grep -q '"returnValue": true' && { say "notification overlay installed"; rm -f /tmp/cytv-notify.ipk; return; }
+      n=$((n+1)); sleep 5
+    done
+    warn "could not install the notification overlay"; rm -f /tmp/cytv-notify.ipk
+  }
   luna() { luna-send -n 1 -w 5000 -f "luna://$1" "$2" </dev/null 2>/dev/null; }
 
   # ---- preflight ----
@@ -87,6 +101,7 @@ PY
   mkdir -p $D/app
   cp "$SRC"/app/* $D/app/
   cp "$SRC"/helper/*.js $D/
+  mkdir -p $D/notify-app && cp "$SRC"/notify/app/* $D/notify-app/
   cp "$SRC"/scripts/* "$SRC"/uninstall.sh $D/
   chmod +x $D/*.sh $D/10-cleanyourtv-home $D/15-cleanyourtv-debloat
   [ -f $D/config.json ] || cp "$SRC/config.example.json" $D/config.json
@@ -130,6 +145,7 @@ PY
   fi
   # earlier test builds installed Live TV as a separate app; it is part of the launcher now
   luna-send -n 1 -w 20000 -f luna://com.webos.appInstallService/dev/remove '{"id":"com.cleanyourtv.live","subscribe":false}' </dev/null >/dev/null 2>&1; rm -rf /media/developer/apps/usr/palm/packages/com.cleanyourtv.live /media/developer/apps/usr/palm/applications/com.cleanyourtv.live
+  [ $NOTIFY = 1 ] && install_notify
   say "done. Hold OK on an app to customise the dock, or use the Customise button at the top right."
   say "Back to LG's Home any time: pick 'Restore LG Home' at the end of the app grid,"
   say "or run: sh $D/undo-home.sh      Update: sh $D/update.sh      Remove everything: sh $D/uninstall.sh"
