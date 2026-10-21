@@ -1,0 +1,19 @@
+#!/bin/sh
+# Restore LG's stock Home. "temp": until next reboot only; no arg: also create DISABLE so reboots keep stock Home.
+export PATH=/usr/bin:/usr/sbin:/bin:/sbin:$PATH
+[ "$1" = temp ] || touch /media/developer/cleanyourtv/DISABLE
+for m in $(awk '$2 ~ /applications\/com.webos.app.home$/ {print $2}' /proc/mounts | sort -r); do umount $m 2>/dev/null; done
+# an airplay child of sam makes the stop wait ~90 s; kill it once the stop has begun
+(sleep 3; pkill -9 -f /usr/palm/applications/airplay/LunaExecutable) </dev/null >/dev/null 2>&1 &
+systemctl restart sam
+for i in $(seq 1 60); do systemctl is-active sam >/dev/null && break; sleep 2; done
+sleep 5
+# the old web renderer for Home would keep showing the launcher; retry until the stock flutter Home is up
+for t in 1 2 3 4; do
+  pkill -f "[a]pp-id=com.webos.app.home"
+  sleep 3
+  luna-send -n 1 -w 10000 -f luna://com.webos.applicationManager/launch '{"id":"com.webos.app.home"}' </dev/null
+  sleep 8
+  pgrep -f "[f]lutter-client -i com.webos.app.home" >/dev/null && ! pgrep -f "[a]pp-id=com.webos.app.home" >/dev/null && break
+done
+echo "stock Home restored; rm /media/developer/cleanyourtv/DISABLE to re-enable at next boot"
