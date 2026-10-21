@@ -34,13 +34,12 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--night);col
 #dock{position:absolute;left:96px;top:110px;display:flex;gap:32px}
 #grid{position:absolute;left:96px;top:440px;width:1728px;display:grid;grid-template-columns:repeat(10,151px);gap:26px 24px}
 
-.tile{--c:74,84,112;position:relative;display:flex;align-items:center;justify-content:center;will-change:transform;
-  background:linear-gradient(150deg,rgba(var(--c),.66),rgba(var(--c),.20) 72%),var(--panel);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.14);transition:transform .15s ease-out}
+.tile{--c:74,84,112;--b:20,22,27;position:relative;display:flex;align-items:center;justify-content:center;will-change:transform;
+  background:rgb(var(--b));transition:transform .15s ease-out}
 .tile img{object-fit:contain}
 .tile svg{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
 .tile .t{font-size:26px;font-weight:600;padding:12px;text-align:center;line-height:1.15;opacity:.9}
-.tile.f{z-index:3;outline:4px solid rgba(255,255,255,.95);outline-offset:4px;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 24px 36px rgba(0,0,0,.6)}
+.tile.f{z-index:3;outline:4px solid rgba(255,255,255,.95);outline-offset:4px;box-shadow:0 24px 36px rgba(0,0,0,.6)}
 #dock .tile{width:408px;height:230px;border-radius:36px}
 #dock .tile img{height:56%;max-width:46%}
 #dock .tile svg{width:96px;height:96px}
@@ -73,7 +72,7 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--night);col
 <div id="view"><div id="scroll"><div id="dock"></div><div id="grid"></div></div></div>
 <div id="toast"></div>
 <script>
-var API='http://127.0.0.1:8765', CACHE_KEY='cytv.cache.v1';
+var API='http://127.0.0.1:8765', CACHE_KEY='cytv.cache.v2';
 var DEFAULTS={
   dock:['netflix','youtube.leanback.v4','amazon','com.disney.disneyplus-prod'],
   topbar:[{label:'Inputs',icon:'inputs',action:'inputs'},{label:'Settings',icon:'settings',app:'com.palm.app.settings'}]
@@ -106,15 +105,23 @@ function hsl2rgb(h,s,l){var a=s*Math.min(l,1-l);function f(n){var k=(n+h/30)%12;
 function rgb2hsl(R,G,B){R/=255;G/=255;B/=255;var mx=Math.max(R,G,B),mn=Math.min(R,G,B),l=(mx+mn)/2,h=0,s=0,d=mx-mn;
   if(d){s=d/(1-Math.abs(2*l-1));h=mx===R?((G-B)/d+(G<B?6:0)):mx===G?(B-R)/d+2:(R-G)/d+4;h*=60}return [h,s,l]}
 function hashHue(id){var h=0;for(var i=0;i<id.length;i++)h=(h*31+id.charCodeAt(i))%360;return h}
+/* returns {c: vibrant colour for the glow, b: the icon's own edge colour for the tile background} */
 function iconColor(img,id){
-  var out=null;
+  var glow=null,edge=null,N=16;
   try{
-    var cv=document.createElement('canvas');cv.width=cv.height=16;var x=cv.getContext('2d');x.drawImage(img,0,0,16,16);
-    var d=x.getImageData(0,0,16,16).data,R=0,G=0,B=0,W=0;
-    for(var i=0;i<d.length;i+=4){var a=d[i+3]/255;if(a<.4)continue;var hs=rgb2hsl(d[i],d[i+1],d[i+2]);var w=a*(.15+hs[1]*hs[1]);R+=d[i]*w;G+=d[i+1]*w;B+=d[i+2]*w;W+=w}
-    if(W>0.5){var h=rgb2hsl(R/W,G/W,B/W);if(h[1]>.22)out=hsl2rgb(h[0],Math.max(.5,Math.min(h[1],.8)),Math.max(.36,Math.min(h[2],.52)))}
+    var cv=document.createElement('canvas');cv.width=cv.height=N;var x=cv.getContext('2d');x.drawImage(img,0,0,N,N);
+    var d=x.getImageData(0,0,N,N).data,R=0,G=0,B=0,W=0,eR=0,eG=0,eB=0,eN=0,ring=0;
+    for(var y=0;y<N;y++)for(var xx=0;xx<N;xx++){
+      var i=(y*N+xx)*4,a=d[i+3]/255;
+      if(y===0||y===N-1||xx===0||xx===N-1){ring++;if(a>.8){eR+=d[i];eG+=d[i+1];eB+=d[i+2];eN++}}
+      if(a<.4)continue;var hs=rgb2hsl(d[i],d[i+1],d[i+2]);var w=a*(.15+hs[1]*hs[1]);R+=d[i]*w;G+=d[i+1]*w;B+=d[i+2]*w;W+=w}
+    if(eN>ring*.5)edge=[Math.round(eR/eN),Math.round(eG/eN),Math.round(eB/eN)];
+    if(W>0.5){var h=rgb2hsl(R/W,G/W,B/W);if(h[1]>.22)glow=hsl2rgb(h[0],Math.max(.5,Math.min(h[1],.8)),Math.max(.36,Math.min(h[2],.52)))}
   }catch(e){}
-  return out||hsl2rgb(hashHue(id),.42,.42)}
+  var fb=hsl2rgb(hashHue(id),.42,.42);
+  glow=glow||(edge&&rgb2hsl(edge[0],edge[1],edge[2])[1]>.3?edge:fb);
+  return {c:glow,b:edge||hsl2rgb(rgb2hsl(glow[0],glow[1],glow[2])[0],.4,.2)}}
+function paint(d,col){d.style.setProperty('--c',col.c.join(','));d.style.setProperty('--b',col.b.join(','))}
 
 /* ---------- tiles (built once per app, reused across rebuilds) ---------- */
 function tile(a){
@@ -123,12 +130,12 @@ function tile(a){
   tiles[a.id]=d;hit(d);
   if(a.sys){d.innerHTML=svg(a.icon);return d}
   var known=colors[a.id];
-  if(known)d.style.setProperty('--c',known.join(','));
+  if(known)paint(d,known);
   var i=new Image();i.alt='';i.decoding='async';
   if(!known)i.crossOrigin='anonymous';
-  i.onload=function(){if(!colors[a.id]){colors[a.id]=iconColor(i,a.id);d.style.setProperty('--c',colors[a.id].join(','));storeSoon();if(rows[r]&&rows[r][c]===d)glowNow(d)}};
+  i.onload=function(){if(!colors[a.id]){colors[a.id]=iconColor(i,a.id);paint(d,colors[a.id]);storeSoon();if(rows[r]&&rows[r][c]===d)glowNow(d)}};
   i.onerror=function(){i.remove();var t=document.createElement('div');t.className='t';t.textContent=a.title;d.appendChild(t);
-    if(!colors[a.id]){colors[a.id]=hsl2rgb(hashHue(a.id),.42,.42);d.style.setProperty('--c',colors[a.id].join(','))}};
+    if(!colors[a.id]){var f=hsl2rgb(hashHue(a.id),.42,.42);colors[a.id]={c:f,b:hsl2rgb(hashHue(a.id),.4,.2)};paint(d,colors[a.id])}};
   i.src=API+'/icon/'+encodeURIComponent(a.id);d.appendChild(i);
   return d}
 
