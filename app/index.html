@@ -430,7 +430,7 @@ setInterval(tick,15000);tick();
 
 
 /* ---------- Live TV (plays the user's M3U playlist in the TV's own video player) ---------- */
-var LIVE_ICON='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 130"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e2a4a"/><stop offset="1" stop-color="#07080d"/></linearGradient><linearGradient id="sc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7a59"/><stop offset="1" stop-color="#e8445a"/></linearGradient></defs><rect width="130" height="130" fill="url(#bg)"/><rect x="22" y="30" width="86" height="58" rx="10" fill="url(#sc)"/><path d="M58 48 L58 70 L77 59 Z" fill="#fff"/><path d="M48 100 H82" stroke="#f5f6f8" stroke-width="7" stroke-linecap="round"/><circle cx="98" cy="40" r="5" fill="#fff"/></svg>');
+var LIVE_ICON='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 130"><rect width="130" height="130" fill="#ef4f5f"/><rect x="25" y="36" width="80" height="54" rx="13" fill="none" stroke="#fff" stroke-width="8"/><path d="M58 52 L58 74 L77 63 Z" fill="#fff"/><path d="M48 104 H82" stroke="#fff" stroke-width="8" stroke-linecap="round"/></svg>');
 var LIVE=(function(){
   var chans=[],groups=[],byNum={},cur=0,epgNow={},video=null,variants=[],vi=0,osdT=0,numT=0,numBuf='',spinT=0,failed=false,loaded=false,setupT=0,fetchT=0;
   var L={open:false,g:0,col:'c',ci:0,list:[]},o={on:false};

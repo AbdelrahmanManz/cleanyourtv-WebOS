@@ -14,6 +14,8 @@ without the boot scripts brings LG's stock Home back.
 
 <p align="center"><img src="docs/screenshots/home.jpg" alt="The home screen: a dock of four apps, the focused app's name on the top shelf and an ambient glow in its colour, then the app grid" width="900"></p>
 
+<p align="center"><img src="docs/screenshots/live.jpg" alt="Live TV: press OK for the guide, with what is on now and next for every channel and the details of the selected programme" width="900"></p>
+
 <table>
 <tr>
 <td><img src="docs/screenshots/grid.jpg" alt="Focus moved into the app grid; the glow changes to the focused app's colour" width="440"></td>
