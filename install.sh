@@ -77,6 +77,7 @@ main() {
   # ---- go live ----
   if [ $START = 1 ]; then
     say "starting (the screen blinks once while the system app manager restarts)"
+    pkill -f "[c]leanyourtv/helper.js"; sleep 1   # an older helper must not keep serving
     sh $D/10-cleanyourtv-home </dev/null
     [ $DEBLOAT = 1 ] && sh $D/debloat-stop.sh </dev/null
     say "done. Hold OK on an app to customise the dock, or use the Customise button at the top right."
