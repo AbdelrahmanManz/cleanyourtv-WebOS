@@ -274,7 +274,7 @@ function load(){api('/api/apps').then(function(x){
 }).catch(function(){toast('Helper not reachable, retrying...');setTimeout(load,3000)})}
 
 /* ---------- input: tap OK to open, hold OK for options ---------- */
-var downT=0,held=false,downEnter=false,swallowUp=false,pressT=0,lastKey=0,lastMX=-1,lastMY=-1;
+var downT=0,held=false,downEnter=false,swallowUp=false,pressT=0,lastKey=0,lastMX=-1,lastMY=-1,lastEnter=0;
 function hit(e){
   e.addEventListener('mousedown',function(){held=false;clearTimeout(pressT);pressT=setTimeout(function(){held=true;options(e)},650)});
   e.addEventListener('mouseup',function(){clearTimeout(pressT)});
@@ -295,14 +295,18 @@ document.addEventListener('mousemove',function(ev){
 
 document.addEventListener('keydown',function(e){
   var k=e.keyCode;lastKey=Date.now();
-  if(stack.length){if(menuKey(k)){if(k===13)swallowUp=true;e.preventDefault()}return}
+  if(stack.length){
+    if(k===13){if(downEnter&&Date.now()-lastEnter<1500){lastEnter=Date.now();e.preventDefault();return}downEnter=true;lastEnter=Date.now();swallowUp=true}
+    if(menuKey(k))e.preventDefault();return}
   var len=rows[r].length;
   if(k===37&&c>0)setFocus(r,c-1);
   else if(k===39&&c<len-1)setFocus(r,c+1);
   else if(k===38&&r>0)setFocus(r-1,mapCol(len,rows[r-1].length,c));
   else if(k===40&&r<rows.length-1)setFocus(r+1,mapCol(len,rows[r+1].length,c));
   else if(k===13){
-    if(!e.repeat){downEnter=true;held=false;clearTimeout(downT);var t=rows[r][c];downT=setTimeout(function(){held=true;options(t)},650)}}
+    /* webOS repeats keydown while OK is held, sometimes without e.repeat: only the first one starts the hold timer */
+    if(!downEnter||Date.now()-lastEnter>1500){downEnter=true;held=false;clearTimeout(downT);var t=rows[r][c];downT=setTimeout(function(){held=true;options(t)},650)}
+    lastEnter=Date.now()}
   else return;
   e.preventDefault()});
 document.addEventListener('keyup',function(e){
