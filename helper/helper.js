@@ -44,32 +44,25 @@ function bump(id) {
     try { fs.writeFileSync(USAGE + '.tmp', JSON.stringify(usage)); fs.renameSync(USAGE + '.tmp', USAGE); } catch (_) {}
   }, 15000);
 }
-let lastFg = null;
+// An app counts as "used" once it has stayed in the foreground for two polls in a row; going back to Home re-arms it.
+let cand = null, streak = 0, counted = null;
 async function onForeground(id) {
-  if (id === lastFg) return;
-  const first = lastFg === null;
-  lastFg = id;
-  if (first || !id || id === 'com.webos.app.home') return;
-  if ((await apps()).some(a => a.id === id)) bump(id);
+  if (id === 'com.webos.app.home') { counted = null; cand = id; streak = 1; return; }
+  if (!id) return;
+  if (id === cand) streak++; else { cand = id; streak = 1; }
+  if (streak >= 2 && id !== counted) {
+    counted = id;
+    if ((await apps()).some(a => a.id === id)) bump(id);
+  }
 }
-// One long-lived subscription instead of polling; it restarts when the system app manager restarts.
-function watchForeground() {
-  const ch = cp.spawn('luna-send', ['-i', '-f', 'luna://com.webos.applicationManager/getForegroundAppInfo', '{"subscribe":true}'],
+// Poll the foreground app every few seconds (a subscription's output is block-buffered by luna-send, so it would arrive late).
+function pollForeground() {
+  const ch = cp.spawn('luna-send', ['-n', '1', '-w', '3000', '-f', 'luna://com.webos.applicationManager/getForegroundAppInfo', '{}'],
     { env: ENV, stdio: ['ignore', 'pipe', 'ignore'] });
-  let buf = '', depth = 0, start = -1;
-  ch.stdout.on('data', d => {
-    buf += d;
-    for (let i = 0; i < buf.length; i++) {
-      if (buf[i] === '{') { if (depth++ === 0) start = i; }
-      else if (buf[i] === '}' && --depth === 0 && start >= 0) {
-        try { const o = JSON.parse(buf.slice(start, i + 1)); if (o.returnValue !== false) onForeground(o.appId || ''); } catch (_) {}
-        buf = buf.slice(i + 1); i = -1; start = -1;
-      }
-    }
-    if (buf.length > 65536) { buf = ''; depth = 0; start = -1; }
-  });
-  ch.on('error', () => setTimeout(watchForeground, 5000));
-  ch.on('close', () => { lastFg = null; setTimeout(watchForeground, 3000); });
+  let out = '';
+  ch.stdout.on('data', d => out += d);
+  ch.on('error', () => {});
+  ch.on('close', () => { try { const o = JSON.parse(out); if (o.returnValue !== false) onForeground(o.appId || ''); } catch (_) {} });
 }
 const body = req => new Promise(r => { let b = ''; req.on('data', c => b += c); req.on('end', () => { try { r(JSON.parse(b || '{}')); } catch (_) { r({}); } }); });
 
@@ -116,4 +109,4 @@ http.createServer(async (req, res) => {
     }
     res.writeHead(404); res.end();
   } catch (e) { json({ error: String(e) }, 500); }
-}).listen(PORT, '127.0.0.1', watchForeground);
+}).listen(PORT, '127.0.0.1', () => setInterval(pollForeground, 4000));

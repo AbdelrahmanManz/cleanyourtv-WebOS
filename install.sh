@@ -107,7 +107,7 @@ PY
     return 0
   fi
   say "starting (the screen blinks once while the system app manager restarts)"
-  pkill -f "[c]leanyourtv/helper.js"; sleep 1   # an older helper must not keep serving
+  pkill -f "[c]leanyourtv/helper.js"; pkill -f "[l]una-send -i -f"; sleep 1   # an older helper (and its leftovers) must not keep running
   sh $D/10-cleanyourtv-home </dev/null
   [ $DEBLOAT = 1 ] && sh $D/debloat-stop.sh </dev/null
 
