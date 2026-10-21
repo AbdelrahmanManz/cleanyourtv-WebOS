@@ -73,41 +73,68 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--night);col
 #lv-stage,#lv-stage video{position:absolute;left:0;top:0;width:1920px;height:1080px;background:#000}
 #lv .layer{position:absolute;opacity:0;pointer-events:none;transition:opacity .2s linear}
 #lv .layer.on{opacity:1}
-#lv-osd{left:0;right:0;bottom:0;height:300px;padding:0 96px 64px;display:flex;align-items:flex-end;gap:36px;background:linear-gradient(to top,rgba(0,0,0,.88),rgba(0,0,0,.62) 60%,rgba(0,0,0,0))}
-#lv-osd .num{font-size:96px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
-#lv-osd .logo{width:132px;height:132px;border-radius:24px;background:#1c1e24;object-fit:contain;flex:none}
+/* channel banner: a floating panel in the launcher's style */
+#lv-osd{left:96px;right:96px;bottom:64px;height:232px;border-radius:44px;padding:0 44px 0 36px;display:flex;align-items:center;gap:32px;
+  background:rgba(12,13,17,.92);box-shadow:inset 0 0 0 1px rgba(255,255,255,.10),0 30px 60px rgba(0,0,0,.5)}
+#lv-osd .logo{width:150px;height:150px;border-radius:34px;background:#1c1e24;object-fit:contain;flex:none}
+#lv-osd .num{font-size:92px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1;min-width:120px;flex:none}
 #lv-osd .info{flex:1;min-width:0}
-#lv-osd .name{font-size:52px;font-weight:700;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#lv-osd .name{font-size:50px;font-weight:700;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #lv-osd .now{font-size:32px;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #lv-osd .next{font-size:26px;color:var(--ink2);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#lv-osd .bar{height:6px;border-radius:3px;background:rgba(255,255,255,.22);margin-top:14px;width:100%}
-#lv-osd .bar i{display:block;height:100%;border-radius:3px;background:var(--ink);width:0}
+.pbar{height:8px;border-radius:4px;background:rgba(255,255,255,.18);overflow:hidden}
+.pbar i{display:block;height:100%;border-radius:4px;background:currentColor;width:0}
+#lv-osd .pbar{margin-top:16px;color:var(--ink)}
 #lv-numin{right:96px;top:64px;font-size:88px;font-weight:700;font-variant-numeric:tabular-nums}
 #lv-msg{left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:18px;font-size:34px}
-#lv-msg.on{background:rgba(0,0,0,.55)}
+#lv-msg.on{background:rgba(0,0,0,.62)}
 #lv-msg b{font-size:56px;letter-spacing:-.02em}
 #lv-msg .small{font-size:26px;color:var(--ink2);max-width:1100px}
-#lv-spin{right:96px;top:64px;width:56px;height:56px;border-radius:50%;border:6px solid rgba(255,255,255,.25);border-top-color:#fff;animation:lvsp 1s linear infinite}
+#lv.gd #lv-spin{visibility:hidden}
+#lv-spin{left:932px;top:512px;width:56px;height:56px;border-radius:50%;border:6px solid rgba(255,255,255,.25);border-top-color:#fff;animation:lvsp 1s linear infinite}
 @keyframes lvsp{to{transform:rotate(360deg)}}
-#lv-list{left:0;top:0;width:1100px;height:1080px;background:rgba(8,9,12,.94);padding:72px 0 0 72px;display:flex;gap:24px}
-#lv-groups{width:380px}#lv-chans{width:580px}
-#lv-list h2{font-size:34px;font-weight:700;margin-bottom:18px;color:var(--ink2)}
-.lrow{display:flex;align-items:center;gap:16px;height:64px;padding:0 22px;border-radius:18px;font-size:27px;margin-bottom:6px;background:rgba(255,255,255,.05)}
-.lrow .n{width:70px;color:var(--ink2);font-variant-numeric:tabular-nums;flex:none}
-.lrow img{width:44px;height:44px;border-radius:10px;object-fit:contain;background:#1c1e24;flex:none}
-.lrow .t{flex:1;min-width:0}
-.lrow .t div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lrow .t .p{font-size:20px;color:var(--ink2);margin-top:1px}
-.lrow.cur .n{color:var(--ink)}
-.lrow.f{background:var(--ink);color:#0b0c10}.lrow.f .n,.lrow.f .t .p{color:rgba(11,12,16,.62)}
-.lrow.dim{background:rgba(255,255,255,.12)}
-#lv .more{height:24px;text-align:center;font-size:20px;color:var(--ink2)}
+/* guide screen (OK) */
+#lv-guide{left:0;top:0;width:1920px;height:1080px;background:rgba(7,8,11,.9)}
+#lv-glow{position:absolute;left:0;top:0;width:1920px;height:720px;background:radial-gradient(ellipse 1400px 640px at 26% -6%,rgba(var(--c),.5),transparent 70%)}
+#lv-gtop{position:absolute;left:96px;right:96px;top:52px;height:76px;display:flex;align-items:center;gap:36px}
+#lv-gtitle{font-size:56px;font-weight:700;letter-spacing:-.02em;flex:none}
+#lv-gtabs{flex:1;display:flex;gap:14px;overflow:hidden;align-items:center}
+.ctab{height:56px;padding:0 26px;max-width:340px;overflow:hidden;text-overflow:ellipsis;border-radius:28px;font-size:25px;font-weight:500;display:flex;align-items:center;white-space:nowrap;flex:none;background:rgba(255,255,255,.09);box-shadow:inset 0 0 0 1px rgba(255,255,255,.10)}
+.ctab.on{background:var(--ink);color:#0b0c10}
+.ctab.m{background:none;box-shadow:none;color:var(--ink2);padding:0 6px}
+#lv-gclock{font-size:56px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;flex:none}
+#lv-rows{position:absolute;left:96px;top:196px;width:900px}
+.crow{display:flex;align-items:center;gap:22px;height:104px;margin-bottom:12px;padding:0 28px 0 18px;border-radius:30px;background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
+.crow .lg{width:72px;height:72px;border-radius:20px;background:#1c1e24;object-fit:contain;flex:none}
+.crow .n{width:78px;font-size:27px;color:var(--ink2);font-variant-numeric:tabular-nums;flex:none}
+.crow .t{flex:1;min-width:0}
+.crow .nm{font-size:30px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crow .nw{font-size:24px;color:var(--ink2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crow .pbar{margin-top:9px;height:6px;color:var(--ink)}
+.crow.cur .n{color:var(--ink)}
+.crow.f{background:var(--ink);color:#0b0c10;box-shadow:0 20px 34px rgba(0,0,0,.5)}
+.crow.f .n,.crow.f .nw{color:rgba(11,12,16,.62)}
+.crow.f .pbar{background:rgba(11,12,16,.18);color:#0b0c10}
+.crow.f .lg{background:#e9ebef}
+.cmore{height:22px;text-align:center;font-size:20px;color:var(--ink2);width:900px;position:absolute;left:0}
+#lv-detail{position:absolute;left:1070px;top:196px;width:754px}
+#lv-detail .dn{font-size:64px;font-weight:700;letter-spacing:-.025em;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#lv-detail .dg{font-size:24px;color:var(--ink2);margin-top:6px}
+#lv-detail .card{margin-top:30px;padding:30px 34px;border-radius:36px;background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+#lv-detail .dt{font-size:24px;color:var(--ink2);font-variant-numeric:tabular-nums}
+#lv-detail .dp{font-size:42px;font-weight:700;letter-spacing:-.02em;margin-top:6px;line-height:1.12;max-height:96px;overflow:hidden}
+#lv-detail .dd{font-size:26px;color:rgba(245,246,248,.82);margin-top:14px;line-height:1.35;max-height:140px;overflow:hidden}
+#lv-detail .card .pbar{margin-top:20px;color:var(--ink)}
+#lv-detail h3{font-size:26px;font-weight:600;color:var(--ink2);margin:30px 0 10px}
+#lv-detail .up{display:flex;gap:22px;font-size:27px;height:50px;align-items:center;white-space:nowrap}
+#lv-detail .up .tm{width:86px;color:var(--ink2);font-variant-numeric:tabular-nums;flex:none}
+#lv-detail .up .tt{overflow:hidden;text-overflow:ellipsis}
 </style></head><body>
 <div class="glow" id="gA"></div><div class="glow" id="gB"></div>
 <div id="top"><div id="time"></div><div id="date"></div><div class="sp"></div><div id="bar"></div></div>
 <div id="shelf"><div id="name"></div></div>
 <div id="view"><div id="scroll"><div id="dock"></div><div id="grid"></div></div></div>
-<div id="lv"><div id="lv-stage"></div><div id="lv-spin" class="layer"></div><div id="lv-osd" class="layer"><div class="num" id="lv-onum"></div><img class="logo" id="lv-ologo" alt=""><div class="info"><div class="name" id="lv-oname"></div><div class="now" id="lv-onow"></div><div class="next" id="lv-onext"></div><div class="bar"><i id="lv-obar"></i></div></div></div><div id="lv-numin" class="layer"></div><div id="lv-list" class="layer"><div id="lv-groups"></div><div id="lv-chans"></div></div><div id="lv-msg" class="layer"></div></div>
+<div id="lv"><div id="lv-stage"></div><div id="lv-spin" class="layer"></div><div id="lv-osd" class="layer"><img class="logo" id="lv-ologo" alt=""><div class="num" id="lv-onum"></div><div class="info"><div class="name" id="lv-oname"></div><div class="now" id="lv-onow"></div><div class="next" id="lv-onext"></div><div class="pbar"><i id="lv-obar"></i></div></div></div><div id="lv-numin" class="layer"></div><div id="lv-guide" class="layer"><div id="lv-glow"></div><div id="lv-gtop"><div id="lv-gtitle"></div><div id="lv-gtabs"></div><div id="lv-gclock"></div></div><div id="lv-rows"></div><div id="lv-detail"></div></div><div id="lv-msg" class="layer"></div></div>
 <div id="toast"></div>
 <script>
 var API='http://127.0.0.1:8765', CACHE_KEY='cytv.cache.v2', VERSION='1.2.0';
@@ -139,10 +166,10 @@ var TX={
  fr:{'Inputs':'Entrées','Settings':'Paramètres','Customise':'Personnaliser','Open':'Ouvrir','Move left in dock':'Déplacer à gauche dans le dock','Move right in dock':'Déplacer à droite dans le dock','Remove from dock':'Retirer du dock','Add to dock':'Ajouter au dock','Add to dock...':'Ajouter au dock...','Replace which app?':'Remplacer quelle app ?','Hide app':'Masquer l’app','Remove this button':'Supprimer ce bouton','hold OK on an app':'maintenez OK sur une app','Hold OK on any app to change the dock':'Maintenez OK sur une app pour modifier le dock','Top buttons':'Boutons du haut','Hidden apps':'Apps masquées','App order':'Ordre des apps','Most used first':'Les plus utilisées d’abord','A to Z':'De A à Z','Reset customisation':'Tout réinitialiser','Add a button...':'Ajouter un bouton...','Add a button':'Ajouter un bouton','An app...':'Une app...','Pick an app':'Choisir une app','OK to remove':'OK pour supprimer','Hidden apps (OK to show again)':'Apps masquées (OK pour afficher)','No hidden apps':'Aucune app masquée','Restore LG Home':'Rétablir LG Home','Restoring LG Home (about 15 s, until next reboot)...':'Rétablissement de LG Home (environ 15 s, jusqu’au prochain redémarrage)...','Could not open':'Impossible d’ouvrir','Could not save settings':'Impossible d’enregistrer les réglages','Helper not reachable, retrying...':'Assistant injoignable, nouvel essai...','Connected':'Connecté','Active':'Actif','Clock':'Horloge','Automatic':'Automatique','24-hour':'24 heures','12-hour':'12 heures'},
  es:{'Inputs':'Entradas','Settings':'Ajustes','Customise':'Personalizar','Open':'Abrir','Move left in dock':'Mover a la izquierda en el dock','Move right in dock':'Mover a la derecha en el dock','Remove from dock':'Quitar del dock','Add to dock':'Añadir al dock','Add to dock...':'Añadir al dock...','Replace which app?':'¿Qué app reemplazar?','Hide app':'Ocultar app','Remove this button':'Quitar este botón','hold OK on an app':'mantén OK en una app','Hold OK on any app to change the dock':'Mantén OK en una app para cambiar el dock','Top buttons':'Botones superiores','Hidden apps':'Apps ocultas','App order':'Orden de las apps','Most used first':'Más usadas primero','A to Z':'De la A a la Z','Reset customisation':'Restablecer personalización','Add a button...':'Añadir un botón...','Add a button':'Añadir un botón','An app...':'Una app...','Pick an app':'Elige una app','OK to remove':'OK para quitar','Hidden apps (OK to show again)':'Apps ocultas (OK para mostrar)','No hidden apps':'No hay apps ocultas','Restore LG Home':'Restaurar LG Home','Restoring LG Home (about 15 s, until next reboot)...':'Restaurando LG Home (unos 15 s, hasta el próximo reinicio)...','Could not open':'No se pudo abrir','Could not save settings':'No se pudieron guardar los ajustes','Helper not reachable, retrying...':'Helper no disponible, reintentando...','Connected':'Conectado','Active':'Activo','Clock':'Reloj','Automatic':'Automático','24-hour':'24 horas','12-hour':'12 horas'}
 };
-var TXL={nl:{'Live TV':'Live TV','All channels':'Alle zenders','Loading channels...':'Zenders laden...','Set up Live TV':'Live TV instellen','Open this address on your phone or computer:':'Open dit adres op je telefoon of computer:','and enter this code:':'en voer deze code in:','Then paste your M3U playlist address. This page closes by itself.':'Plak daarna het adres van je M3U-afspeellijst. Deze pagina sluit vanzelf.','This channel is not available.':'Deze zender is niet beschikbaar.','Press OK to try again.':'Druk op OK om het opnieuw te proberen.','The helper is not reachable.':'De helper is niet bereikbaar.','Next':'Straks','No guide data':'Geen programmagegevens'},
- de:{'All channels':'Alle Sender','Loading channels...':'Sender werden geladen...','Set up Live TV':'Live TV einrichten','Open this address on your phone or computer:':'Öffne diese Adresse auf dem Handy oder Computer:','and enter this code:':'und gib diesen Code ein:','Then paste your M3U playlist address. This page closes by itself.':'Füge dann die Adresse deiner M3U-Playlist ein. Diese Seite schließt sich von selbst.','This channel is not available.':'Dieser Sender ist nicht verfügbar.','Press OK to try again.':'OK drücken, um es erneut zu versuchen.','The helper is not reachable.':'Der Helper ist nicht erreichbar.','Next':'Danach','No guide data':'Keine Programmdaten'},
- fr:{'All channels':'Toutes les chaînes','Loading channels...':'Chargement des chaînes...','Set up Live TV':'Configurer Live TV','Open this address on your phone or computer:':'Ouvrez cette adresse sur votre téléphone ou ordinateur :','and enter this code:':'et saisissez ce code :','Then paste your M3U playlist address. This page closes by itself.':'Collez ensuite l’adresse de votre liste M3U. Cette page se ferme toute seule.','This channel is not available.':'Cette chaîne n’est pas disponible.','Press OK to try again.':'Appuyez sur OK pour réessayer.','The helper is not reachable.':'L’assistant est injoignable.','Next':'Ensuite','No guide data':'Pas de guide'},
- es:{'All channels':'Todos los canales','Loading channels...':'Cargando canales...','Set up Live TV':'Configurar Live TV','Open this address on your phone or computer:':'Abre esta dirección en tu móvil u ordenador:','and enter this code:':'e introduce este código:','Then paste your M3U playlist address. This page closes by itself.':'Después pega la dirección de tu lista M3U. Esta página se cierra sola.','This channel is not available.':'Este canal no está disponible.','Press OK to try again.':'Pulsa OK para reintentar.','The helper is not reachable.':'El helper no está disponible.','Next':'Después','No guide data':'Sin guía'}};
+var TXL={nl:{'Live TV':'Live TV','All channels':'Alle zenders','Loading channels...':'Zenders laden...','Set up Live TV':'Live TV instellen','Open this address on your phone or computer:':'Open dit adres op je telefoon of computer:','and enter this code:':'en voer deze code in:','Then paste your M3U playlist address. This page closes by itself.':'Plak daarna het adres van je M3U-afspeellijst. Deze pagina sluit vanzelf.','This channel is not available.':'Deze zender is niet beschikbaar.','Press OK to try again.':'Druk op OK om het opnieuw te proberen.','The helper is not reachable.':'De helper is niet bereikbaar.','Next':'Straks','Later':'Later','No guide data':'Geen programmagegevens'},
+ de:{'All channels':'Alle Sender','Loading channels...':'Sender werden geladen...','Set up Live TV':'Live TV einrichten','Open this address on your phone or computer:':'Öffne diese Adresse auf dem Handy oder Computer:','and enter this code:':'und gib diesen Code ein:','Then paste your M3U playlist address. This page closes by itself.':'Füge dann die Adresse deiner M3U-Playlist ein. Diese Seite schließt sich von selbst.','This channel is not available.':'Dieser Sender ist nicht verfügbar.','Press OK to try again.':'OK drücken, um es erneut zu versuchen.','The helper is not reachable.':'Der Helper ist nicht erreichbar.','Next':'Danach','Later':'Später','No guide data':'Keine Programmdaten'},
+ fr:{'All channels':'Toutes les chaînes','Loading channels...':'Chargement des chaînes...','Set up Live TV':'Configurer Live TV','Open this address on your phone or computer:':'Ouvrez cette adresse sur votre téléphone ou ordinateur :','and enter this code:':'et saisissez ce code :','Then paste your M3U playlist address. This page closes by itself.':'Collez ensuite l’adresse de votre liste M3U. Cette page se ferme toute seule.','This channel is not available.':'Cette chaîne n’est pas disponible.','Press OK to try again.':'Appuyez sur OK pour réessayer.','The helper is not reachable.':'L’assistant est injoignable.','Next':'Ensuite','Later':'Plus tard','No guide data':'Pas de guide'},
+ es:{'All channels':'Todos los canales','Loading channels...':'Cargando canales...','Set up Live TV':'Configurar Live TV','Open this address on your phone or computer:':'Abre esta dirección en tu móvil u ordenador:','and enter this code:':'e introduce este código:','Then paste your M3U playlist address. This page closes by itself.':'Después pega la dirección de tu lista M3U. Esta página se cierra sola.','This channel is not available.':'Este canal no está disponible.','Press OK to try again.':'Pulsa OK para reintentar.','The helper is not reachable.':'El helper no está disponible.','Next':'Después','Later':'Más tarde','No guide data':'Sin guía'}};
 function t(k){var d=TX[LANG],l=TXL[LANG];return (d&&d[k])||(l&&l[k])||k}
 /* a button's label: built-in buttons are translated, buttons you added keep the app's own name */
 function barLabel(o){return o.action==='inputs'?t('Inputs'):o.app==='com.palm.app.settings'?t('Settings'):o.action==='customize'?t('Customise'):o.action==='live'?t('Live TV'):(o.label||'')}
@@ -440,25 +467,45 @@ var LIVE=(function(){
     ids=ids.filter(function(i){return i});if(!ids.length){cb&&cb();return}
     api('/api/live/epg?ids='+encodeURIComponent(ids.join(','))).then(function(x){for(var k in x)epgNow[k]=x[k];if(byNum[cur]&&ids.indexOf(byNum[cur].id)>=0)fillOsd();cb&&cb()}).catch(function(){cb&&cb()})}
   setInterval(function(){if(o.on&&byNum[cur])loadEpg([byNum[cur].id])},30000);
+  var full={};
   function listFor(g){return g===0?chans:chans.filter(function(c){return c.group===groups[g-1]})}
+  function gcolor(){var n=L.g===0?'all':groups[L.g-1],c=hsl2rgb(hashHue(n),.5,.42);$('lv-glow').style.setProperty('--c',c.join(','))}
   function openList(){
-    L.open=true;L.col='c';var c=byNum[cur];L.g=0;
+    L.open=true;var c=byNum[cur];L.g=0;
     if(c&&c.group){var gi=groups.indexOf(c.group);if(gi>=0)L.g=gi+1}
-    L.list=listFor(L.g);L.ci=Math.max(0,L.list.indexOf(c));drawList();layer('lv-list',true);fetchVisible()}
-  function closeList(){L.open=false;layer('lv-list',false)}
+    L.list=listFor(L.g);L.ci=Math.max(0,L.list.indexOf(c));drawList();$('lv').classList.add('gd');layer('lv-guide',true);fetchVisible()}
+  function closeList(){L.open=false;$('lv').classList.remove('gd');layer('lv-guide',false)}
+  function pct(p,now){return Math.max(0,Math.min(100,(now-p[0])/(p[1]-p[0])*100))}
   function drawList(){
-    var N=11,names=[t('All channels')].concat(groups),gs=Math.max(0,Math.min(L.g-5,names.length-N)),gh='<h2>'+t('Live TV')+'</h2><div class="more">'+(gs>0?'▲':'')+'</div>';
-    for(var i=gs;i<Math.min(names.length,gs+N);i++)gh+='<div class="lrow'+(i===L.g?(L.col==='g'?' f':' dim'):'')+'"><div class="t"><div>'+lesc(names[i])+'</div></div></div>';
-    gh+='<div class="more">'+(gs+N<names.length?'▼':'')+'</div>';$('lv-groups').innerHTML=gh;
-    var cs=Math.max(0,Math.min(L.ci-5,L.list.length-N)),ch='<h2>&nbsp;</h2><div class="more">'+(cs>0?'▲':'')+'</div>';
+    var now=Math.floor(Date.now()/1000),names=[t('All channels')].concat(groups);
+    $('lv-gtitle').textContent=t('Live TV');
+    var d=new Date(),tabs='';
+    if(L.g>0)tabs+='<div class="ctab m">\u2039</div><div class="ctab">'+lesc(names[L.g-1])+'</div>';
+    tabs+='<div class="ctab on">'+lesc(names[L.g])+'</div>';
+    if(L.g<names.length-1)tabs+='<div class="ctab">'+lesc(names[L.g+1])+'</div><div class="ctab m">\u203A</div>';
+    $('lv-gtabs').innerHTML=tabs;
+    $('lv-gclock').textContent=d.toLocaleTimeString(LOC,clockOpts());gcolor();
+    var N=7,cs=Math.max(0,Math.min(L.ci-3,L.list.length-N)),h='';
     for(var j=cs;j<Math.min(L.list.length,cs+N);j++){
-      var c=L.list[j],e=epgNow[c.id],p=e&&e.now?e.now[2]:'';
-      ch+='<div class="lrow'+(j===L.ci?(L.col==='c'?' f':' dim'):'')+(c.num===cur?' cur':'')+'"><div class="n">'+c.num+'</div>'+(c.logo?'<img src="'+lesc(c.logo)+'" alt="">':'<img alt="">')+'<div class="t"><div>'+lesc(c.name)+'</div><div class="p">'+lesc(p)+'</div></div></div>'}
-    ch+='<div class="more">'+(cs+N<L.list.length?'▼':'')+'</div>';$('lv-chans').innerHTML=ch}
+      var c=L.list[j],e=epgNow[c.id],pn=e&&e.now;
+      h+='<div class="crow'+(j===L.ci?' f':'')+(c.num===cur?' cur':'')+'"><div class="n">'+c.num+'</div>'+(c.logo?'<img class="lg" src="'+lesc(c.logo)+'" alt="">':'<div class="lg"></div>')
+        +'<div class="t"><div class="nm">'+lesc(c.name)+'</div><div class="nw">'+(pn?lesc(hm(pn[0])+'  '+pn[2]):(e?'':lesc(t('No guide data'))))+'</div>'
+        +(pn?'<div class="pbar"><i style="width:'+pct(pn,now)+'%"></i></div>':'')+'</div></div>'}
+    $('lv-rows').innerHTML=h;drawDetail()}
+  function drawDetail(){
+    var c=L.list[L.ci];if(!c){$('lv-detail').innerHTML='';return}
+    var f=full[c.id],now=Math.floor(Date.now()/1000),h='<div class="dn">'+lesc(c.name)+'</div><div class="dg">'+lesc(c.group||'')+'</div>';
+    if(f&&f.list&&f.list.length){
+      var p=f.list[0],live=p[0]<=now;
+      h+='<div class="card"><div class="dt">'+lesc(hm(p[0])+' – '+hm(p[1]))+(live?'':'')+'</div><div class="dp">'+lesc(p[2])+'</div>'+(p[3]?'<div class="dd">'+lesc(p[3])+'</div>':'')+(live?'<div class="pbar"><i style="width:'+pct(p,now)+'%"></i></div>':'')+'</div>';
+      if(f.list.length>1){h+='<h3>'+t('Later')+'</h3>';for(var i=1;i<Math.min(5,f.list.length);i++)h+='<div class="up"><div class="tm">'+hm(f.list[i][0])+'</div><div class="tt">'+lesc(f.list[i][2])+'</div></div>'}}
+    else h+='<div class="card"><div class="dt">'+lesc(f?t('No guide data'):'…')+'</div></div>';
+    $('lv-detail').innerHTML=h}
   function fetchVisible(){
     clearTimeout(fetchT);fetchT=setTimeout(function(){
-      var cs=Math.max(0,Math.min(L.ci-5,L.list.length-11)),ids=L.list.slice(cs,cs+11).map(function(c){return c.id}).filter(function(i){return i&&!epgNow[i]});
-      if(ids.length)loadEpg(ids,function(){if(L.open)drawList()})},180)}
+      var cs=Math.max(0,Math.min(L.ci-3,L.list.length-7)),ids=L.list.slice(cs,cs+7).map(function(c){return c.id}).filter(function(i){return i&&!epgNow[i]});
+      if(ids.length)loadEpg(ids,function(){if(L.open)drawList()});
+      var c=L.list[L.ci];if(c&&c.id&&!full[c.id])api('/api/live/epg?full=1&ids='+encodeURIComponent(c.id)).then(function(x){full[c.id]=x[c.id]||{list:[]};if(L.open)drawDetail()}).catch(function(){})},160)}
   function digit(d){
     numBuf+=d;if(numBuf.length>5)numBuf=numBuf.slice(-5);
     $('lv-numin').textContent=numBuf;layer('lv-numin',true);clearTimeout(numT);
@@ -484,16 +531,19 @@ var LIVE=(function(){
     }).catch(function(){msg('<div>'+t('The helper is not reachable.')+'</div>');setTimeout(function(){if(o.on)boot()},3000)})}
   function step(d){var i=chans.indexOf(byNum[cur]);i=(i+d+chans.length)%chans.length;play(chans[i].num)}
   o.enter=function(){o.on=true;$('lv').classList.add('on');if(loaded&&byNum[cur])play(cur);else boot()};
-  o.exit=function(){o.on=false;closeList();stop();clearTimeout(osdT);clearTimeout(numT);clearInterval(setupT);layer('lv-osd',false);layer('lv-numin',false);layer('lv-msg',false);layer('lv-spin',false);$('lv').classList.remove('on')};
+  o.exit=function(){o.on=false;closeList();full={};stop();clearTimeout(osdT);clearTimeout(numT);clearInterval(setupT);layer('lv-osd',false);layer('lv-numin',false);layer('lv-msg',false);layer('lv-spin',false);$('lv').classList.remove('on')};
   o.key=function(e){
     var k=e.keyCode;e.preventDefault();
     if(!loaded){if(k===461||k===27||k===8)o.exit();return}
     if(L.open){
-      if(k===38){if(L.col==='g'){if(L.g>0){L.g--;L.list=listFor(L.g);L.ci=0}}else if(L.ci>0)L.ci--}
-      else if(k===40){if(L.col==='g'){if(L.g<groups.length){L.g++;L.list=listFor(L.g);L.ci=0}}else if(L.ci<L.list.length-1)L.ci++}
-      else if(k===37)L.col='g';
-      else if(k===39)L.col='c';
-      else if(k===13){if(L.col==='g')L.col='c';else if(L.list[L.ci]){var n=L.list[L.ci].num;closeList();play(n);return}}
+      var n7=7;
+      if(k===38){if(L.ci>0)L.ci--}
+      else if(k===40){if(L.ci<L.list.length-1)L.ci++}
+      else if(k===33||k===427){L.ci=Math.max(0,L.ci-n7)}
+      else if(k===34||k===428){L.ci=Math.min(L.list.length-1,L.ci+n7)}
+      else if(k===37){if(L.g>0){L.g--;L.list=listFor(L.g);L.ci=0}}
+      else if(k===39){if(L.g<groups.length){L.g++;L.list=listFor(L.g);L.ci=0}}
+      else if(k===13){if(L.list[L.ci]){var n=L.list[L.ci].num;closeList();play(n);return}}
       else if(k===461||k===27||k===8){closeList();return}
       else if(k>=48&&k<=57){closeList();digit(k-48);return}
       else return;

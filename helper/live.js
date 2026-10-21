@@ -71,10 +71,11 @@ async function loadEpg(url, wantedIds) {
   let buf = '', cur = null, count = 0;
   const handle = line => {
     let m;
-    if ((m = line.match(/<programme\b[^>]*\bchannel="([^"]*)"[^>]*\bstart="([^"]*)"[^>]*\bstop="([^"]*)"/))) cur = want.has(m[1]) ? { id: m[1], s: xmltvTime(m[2]), e: xmltvTime(m[3]), t: '' } : null;
+    if ((m = line.match(/<programme\b[^>]*\bchannel="([^"]*)"[^>]*\bstart="([^"]*)"[^>]*\bstop="([^"]*)"/))) cur = want.has(m[1]) ? { id: m[1], s: xmltvTime(m[2]), e: xmltvTime(m[3]), t: '', d: '' } : null;
     else if (cur && !cur.t && (m = line.match(/<title[^>]*>([^<]*)<\/title>/))) cur.t = decode(m[1]);
+    else if (cur && !cur.d && (m = line.match(/<desc[^>]*>([^<]*)<\/desc>/))) cur.d = decode(m[1]).slice(0, 220);
     if (cur && line.includes('</programme>')) {
-      if (cur.e > from && cur.s < to) { (byId[cur.id] = byId[cur.id] || []).push([cur.s, cur.e, cur.t]); count++; }
+      if (cur.e > from && cur.s < to && !/^no data$/i.test(cur.t.trim())) { (byId[cur.id] = byId[cur.id] || []).push(cur.d ? [cur.s, cur.e, cur.t, cur.d] : [cur.s, cur.e, cur.t]); count++; }
       cur = null;
     }
   };
@@ -88,7 +89,7 @@ async function loadEpg(url, wantedIds) {
     stream.on('end', resolve); stream.on('error', reject);
   });
   for (const id in byId) byId[id].sort((a, b) => a[0] - b[0]);
-  return { fetchedAt: Date.now(), count, byId };
+  return { v: 3, fetchedAt: Date.now(), count, byId };
 }
 
 let refreshing = false;
@@ -103,7 +104,7 @@ async function refresh(force) {
     }
     status = { state: 'idle', error: '' };
     const epgUrl = settings.epgUrl || playlist.epgUrl;
-    if (epgUrl && (force || !epg || Date.now() - epg.fetchedAt > REFRESH_MS)) {
+    if (epgUrl && (force || !epg || epg.v !== 3 || Date.now() - epg.fetchedAt > REFRESH_MS)) {
       status = { state: 'loading guide', error: '' };
       try { epg = await loadEpg(epgUrl, playlist.channels.map(c => c.id).filter(Boolean)); writeJson(EPG, epg); }
       catch (e) { status = { state: 'idle', error: 'guide: ' + e.message }; }
@@ -171,7 +172,9 @@ async function handle(req, res, u, body) {
     for (const id of (q.get('ids') || '').split(',').filter(Boolean).slice(0, 60)) {
       const list = epg && epg.byId[id]; if (!list) continue;
       const i = list.findIndex(p => p[1] > now);
-      if (i >= 0) out[id] = { now: list[i][0] <= now ? list[i] : null, next: list[list[i][0] <= now ? i + 1 : i] || null };
+      if (i < 0) continue;
+      if (q.get('full')) out[id] = { list: list.slice(i, i + 8) };
+      else out[id] = { now: list[i][0] <= now ? list[i] : null, next: list[list[i][0] <= now ? i + 1 : i] || null };
     }
     return json(out);
   }
