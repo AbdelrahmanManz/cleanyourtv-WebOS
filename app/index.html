@@ -72,7 +72,7 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--night);col
 <div id="view"><div id="scroll"><div id="dock"></div><div id="grid"></div></div></div>
 <div id="toast"></div>
 <script>
-var API='http://127.0.0.1:8765', CACHE_KEY='cytv.cache.v2';
+var API='http://127.0.0.1:8765', CACHE_KEY='cytv.cache.v2', VERSION='1.1.0';
 var DEFAULTS={
   dock:['netflix','youtube.leanback.v4','amazon','com.disney.disneyplus-prod'],
   topbar:[{label:'Inputs',icon:'inputs',action:'inputs'},{label:'Settings',icon:'settings',app:'com.palm.app.settings'}]
@@ -91,13 +91,13 @@ var ICONS={
 };
 function svg(name){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+(ICONS[name]||ICONS.grid)+'</svg>'}
 
-var apps=[], cfg={}, rows=[], r=1, c=0, colors={}, tiles={}, lastSig='', gSide=0, gColor='', gT=0, saveT=0;
+var apps=[], cfg={}, usage={}, warned=false, rows=[], r=1, c=0, colors={}, tiles={}, lastSig='', gSide=0, gColor='', gT=0, saveT=0;
 function $(id){return document.getElementById(id)}
 var toastT;
 function toast(t){var e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(function(){e.classList.remove('on')},4000)}
 function api(p,body){return fetch(API+p,body?{method:'POST',body:JSON.stringify(body)}:{}).then(function(x){return x.json()})}
 function launch(id,params){api('/api/launch',{id:id,params:params}).then(function(x){if(x&&x.returnValue===false)toast('Could not open '+id)})}
-function store(){try{localStorage.setItem(CACHE_KEY,JSON.stringify({apps:apps,cfg:cfg,colors:colors}))}catch(e){}}
+function store(){try{localStorage.setItem(CACHE_KEY,JSON.stringify({apps:apps,cfg:cfg,usage:usage,colors:colors}))}catch(e){}}
 function storeSoon(){clearTimeout(saveT);saveT=setTimeout(store,1500)}
 
 /* ---------- colour (extracted once per app, then remembered) ---------- */
@@ -169,6 +169,9 @@ function setDock(ids){cfg.dock=ids.slice(0,4);saveCfg()}
 function hideApp(id){cfg.hidden=(cfg.hidden||[]).concat(id);cfg.dock=dockIds().filter(function(i){return i!==id});saveCfg()}
 function unhideApp(id){cfg.hidden=(cfg.hidden||[]).filter(function(i){return i!==id});saveCfg()}
 function topbar(){return cfg.topbar?cfg.topbar:DEFAULTS.topbar}
+function byOrder(a,b){
+  if(cfg.sort!=='alpha'){var d=(usage[b.id]||0)-(usage[a.id]||0);if(Math.abs(d)>1e-9)return d>0?1:-1}
+  return a.title.localeCompare(b.title)}
 function title(id){for(var i=0;i<apps.length;i++)if(apps[i].id===id)return apps[i].title;return id}
 
 /* ---------- actions ---------- */
@@ -237,7 +240,8 @@ function customizeMenu(){
     {icon:'grid',label:'Dock',sub:'hold OK on an app',stay:true,fn:function(){toast('Hold OK on any app to change the dock')}},
     {icon:'settings',label:'Top buttons',stay:true,fn:topButtonsMenu},
     {icon:'edit',label:'Hidden apps',stay:true,fn:hiddenMenu},
-    {icon:'restore',label:'Reset dock, buttons and hidden apps',fn:function(){cfg={};saveCfg()}}])}
+    {icon:'grid',label:'App order',sub:cfg.sort==='alpha'?'A to Z':'Most used first',fn:function(){cfg.sort=cfg.sort==='alpha'?'usage':'alpha';saveCfg()}},
+    {icon:'restore',label:'Reset dock, buttons, hidden apps and order',fn:function(){cfg={};saveCfg()}}])}
 function topButtonsMenu(){
   var items=topbar().map(function(o){return {label:o.label,sub:'OK to remove',fn:function(){removeButton(o)}}});
   items.push({label:'Add a button...',stay:true,fn:addButtonMenu});
@@ -257,7 +261,7 @@ function hiddenMenu(){
 function rebuild(){
   var by={};apps.forEach(function(a){by[a.id]=a});
   var di=dockIds(),dock=di.map(function(i){return by[i]});
-  var rest=apps.filter(function(a){return !isHidden(a.id)&&di.indexOf(a.id)<0}).sort(function(a,b){return a.title.localeCompare(b.title)});
+  var rest=apps.filter(function(a){return !isHidden(a.id)&&di.indexOf(a.id)<0}).sort(byOrder);
   rest.push({id:'__undo',title:'Restore LG Home',sys:true,icon:'restore'});
   var oldE=rows[r]&&rows[r][c],keep=oldE&&oldE._a?oldE._a.id:null;
   if(oldE)oldE.classList.remove('f');
@@ -275,7 +279,10 @@ function rebuild(){
   setFocus(nr,nc,true)}
 
 function load(){api('/api/apps').then(function(x){
-  var sig=JSON.stringify([x.apps.map(function(a){return a.id}),x.config]);
+  if(x.version&&x.version!==VERSION&&!warned){warned=true;toast('Launcher '+VERSION+' and helper '+x.version+' differ: run the installer again')}
+  usage=x.usage||{};
+  var rank=Object.keys(usage).sort(function(a,b){return usage[b]-usage[a]});
+  var sig=JSON.stringify([x.apps.map(function(a){return a.id}),x.config,rank]);
   if(sig===lastSig)return;lastSig=sig;
   apps=x.apps.map(function(a){return {id:a.id,title:a.title}});cfg=x.config||{};store();rebuild()
 }).catch(function(){toast('Helper not reachable, retrying...');setTimeout(load,3000)})}
@@ -331,6 +338,6 @@ setInterval(tick,15000);tick();
 
 /* first paint straight from the last known layout, then refresh from the helper */
 try{var cached=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');
-  if(cached&&cached.apps&&cached.apps.length){apps=cached.apps;cfg=cached.cfg||{};colors=cached.colors||{};rebuild()}}catch(e){}
+  if(cached&&cached.apps&&cached.apps.length){apps=cached.apps;cfg=cached.cfg||{};usage=cached.usage||{};colors=cached.colors||{};rebuild()}}catch(e){}
 load();
 </script></body></html>
