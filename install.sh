@@ -31,7 +31,7 @@ main() {
   say() { echo "[cleanyourtv] $*"; }
   warn() { echo "[cleanyourtv] WARNING: $*" >&2; }
   die() { echo "[cleanyourtv] ERROR: $*" >&2; exit 1; }
-  luna() { luna-send -n 1 -w 5000 -f "$@" </dev/null 2>/dev/null; }
+  luna() { luna-send -n 1 -w 5000 -f "luna://$1" "$2" </dev/null 2>/dev/null; }
 
   # ---- preflight ----
   [ "$(id -u)" = 0 ] || die "run as root (ssh root@<tv-ip>)"
