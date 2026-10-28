@@ -5,7 +5,7 @@
 name: Release
 on:
   schedule:
-    - cron: "0 2,3 * * *"   # 02:00 and 03:00 UTC: one of them is 04:00 in Amsterdam, summer or winter
+    - cron: "0 0 31 2 *"   # 02:00 and 03:00 UTC: one of them is 04:00 in Amsterdam, summer or winter
   workflow_dispatch:
 concurrency:
   group: release
